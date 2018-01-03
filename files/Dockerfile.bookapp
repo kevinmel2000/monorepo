@@ -1,0 +1,6 @@
+FROM envoyproxy/envoy:latest
+
+COPY bookapp /usr/local/bin
+COPY ./envoy /envoy
+COPY entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh", "bookapp"]
