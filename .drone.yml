@@ -1,0 +1,5 @@
+pipeline:
+  build:
+    image: golang:latest
+    commands:
+      - /GoTest.sh ${DRONE_COMMIT_SHA}
