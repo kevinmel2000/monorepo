@@ -1,5 +1,12 @@
+workspace:
+  base: /go
+  path: src/github.com/lab46/example
+
 pipeline:
-  build:
+  test:
     image: golang:latest
     commands:
-      - /GoTest.sh ${DRONE_COMMIT_SHA}
+      - export GOPATH=/go
+      - go get -u github.com/golang/dep/...
+      - dep ensure
+      - ./GoTest.sh ${DRONE_COMMIT_SHA}

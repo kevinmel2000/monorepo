@@ -2,9 +2,9 @@ package rdbms
 
 import (
 	"github.com/jmoiron/sqlx"
+	"github.com/lab46/example/pkg/errors"
+	"github.com/lab46/example/pkg/log"
 	_ "github.com/lib/pq"
-	"github.com/tokopedia/cartapp/errors"
-	"github.com/tokopedia/cartapp/log"
 )
 
 type dsn struct {
@@ -47,7 +47,7 @@ func Init(cfg Config) error {
 	return nil
 }
 
-func InitFromYamlFile(yamldir string) {
+func InitFromYamlFile(yamldir string) error {
 
 }
 

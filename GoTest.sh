@@ -1,8 +1,7 @@
 #!/bin/bash
-# set -e
 
 commitsha=$1
-echo "DEBUG: ./GetTest.sh ${commitsha}"
+echo "DEBUG: ./GoTest.sh ${commitsha}"
 filespath=()
 # get files changed in the last commit
 # will only get changed files in /*.go and not *.go
