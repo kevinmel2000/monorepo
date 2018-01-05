@@ -2,7 +2,6 @@ package rdbms
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/lab46/example/pkg/errors"
 	"github.com/lab46/example/pkg/log"
 	_ "github.com/lib/pq"
 )
@@ -44,26 +43,5 @@ func Init(cfg Config) error {
 		}
 		dbObject.connectedDbs[dbType(dbName)] = newDB
 	}
-	return nil
-}
-
-func InitFromYamlFile(yamldir string) error {
-
-}
-
-// Get database
-func Get(dType dbType) (*sqlx.DB, error) {
-	if dbConn, ok := dbObject.connectedDbs[dType]; ok {
-		return dbConn, nil
-	}
-	return nil, errors.New(errors.DatabaseTypeNotExists)
-}
-
-// GetFatal database
-func MustGet(dType dbType) *sqlx.DB {
-	if dbConn, ok := dbObject.connectedDbs[dType]; ok {
-		return dbConn
-	}
-	log.Fatalf("Database with type %s is not exists", dType)
 	return nil
 }

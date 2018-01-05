@@ -1,5 +1,3 @@
 package book
 
-func something() {
-
-}
+type handler string
