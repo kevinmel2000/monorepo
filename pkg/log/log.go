@@ -1,17 +1,20 @@
 package log
 
 import (
+	"flag"
 	"strings"
 
-	errors "github.com/lab46/example/pkg/errors"
+	"github.com/lab46/example/pkg/errors"
+	"github.com/lab46/example/pkg/flags"
 	"go.uber.org/zap"
 )
 
 // logging library using uber zap
 
 var (
-	logger  *zap.Logger
-	sugared *zap.SugaredLogger
+	logger    *zap.Logger
+	sugared   *zap.SugaredLogger
+	logConfig config
 )
 
 type level int
@@ -25,6 +28,23 @@ const (
 	FatalLevel
 )
 
+const (
+	DebugLevelString = "debug"
+	InfoLevelString  = "info"
+	WarnLevelString  = "warn"
+	ErrorLevelString = "error"
+	FatalLevelString = "fatal"
+)
+
+type config struct {
+	logLevel string
+}
+
+func (c *config) Parse(fs *flag.FlagSet, args []string) error {
+	fs.StringVar(&c.logLevel, "log_level", "info", "logging level")
+	return fs.Parse(args)
+}
+
 func newZapConfig() zap.Config {
 	config := zap.NewProductionConfig()
 	config.DisableCaller = true
@@ -32,12 +52,10 @@ func newZapConfig() zap.Config {
 	return config
 }
 
-func init() {
-	config := newZapConfig()
-	logger, _ = config.Build()
-	defer logger.Sync()
-	sugared = logger.Sugar()
-	defer sugared.Sync()
+func FlagParse() {
+	logConfig = config{}
+	flags.Parse(&logConfig)
+	SetLevel(stringToLevel(logConfig.logLevel))
 }
 
 // SetLevel will set level to logger and create a new logger based on level
@@ -63,6 +81,27 @@ func SetLevel(l level) {
 	defer sugared.Sync()
 }
 
+func SetLevelString(l string) {
+	SetLevel(stringToLevel(l))
+}
+
+func stringToLevel(s string) level {
+	switch strings.ToLower(s) {
+	case DebugLevelString:
+		return DebugLevel
+	case InfoLevelString:
+		return InfoLevel
+	case WarnLevelString:
+		return WarnLevel
+	case ErrorLevelString:
+		return ErrorLevel
+	case FatalLevelString:
+		return FatalLevel
+	default:
+		return InfoLevel
+	}
+}
+
 func Debug(args ...interface{}) {
 	sugared.Debug(args...)
 }
@@ -73,6 +112,22 @@ func Debugf(format string, args ...interface{}) {
 
 func Debugw(msg string, keyAndValues ...interface{}) {
 	sugared.Debugw(msg, keyAndValues)
+}
+
+func Print(args ...interface{}) {
+	sugared.Info(args...)
+}
+
+func Println(args ...interface{}) {
+	sugared.Info(args...)
+}
+
+func Printf(format string, args ...interface{}) {
+	sugared.Infof(format, args...)
+}
+
+func Printw(msg string, keyAndValues ...interface{}) {
+	sugared.Infow(msg, keyAndValues...)
 }
 
 func Info(args ...interface{}) {

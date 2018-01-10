@@ -1,0 +1,15 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: golang:1.9
+    working_directory: /go/src/github.com/lab46/example
+
+    steps:
+      - checkout
+      - run: - go get -u github.com/golang/dep/...
+      - run: dep ensure
+      - run:
+          name: Run unit tests
+          command: |
+            make test.circleci

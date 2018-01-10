@@ -2,9 +2,14 @@ package config
 
 import (
 	"flag"
+	"io/ioutil"
+	"os"
+	"path"
+	"strings"
 
 	"github.com/lab46/example/pkg/env"
-	"github.com/lab46/example/pkg/flags"
+	"github.com/lab46/example/pkg/log"
+	"gopkg.in/yaml.v2"
 )
 
 type config struct {
@@ -16,15 +21,19 @@ var cfg config
 
 func (c *config) Parse(fs *flag.FlagSet, args []string) error {
 	fs.StringVar(&c.Path, "config_path", "", "configuration path")
-	return nil
+	return fs.Parse(args)
 }
 
 func init() {
-	flags.Parse(&cfg)
 	cfg.Env = env.GetCurrentServiceEnv()
 }
 
-func OverrideConfigPath(path string) {
+func SetConfigDir(path string) {
+	if f, err := os.Stat(path); err != nil {
+		log.Warnf("Failed to check path stats: %s", err.Error())
+	} else if !f.IsDir() {
+		log.Warnf("%s is not a directory")
+	}
 	cfg.Path = path
 }
 
@@ -33,5 +42,15 @@ func GetPath() string {
 }
 
 func LoadYamlConfig(result interface{}, filename string) error {
-	return nil
+	dirEnv := strings.ToLower(cfg.Env)
+	if dirEnv == "" {
+		dirEnv = env.DevelopmentEnv
+	}
+	confPath := path.Join(cfg.Path, dirEnv, filename)
+	log.Debugf("load config from: %s", confPath)
+	content, err := ioutil.ReadFile(confPath)
+	if err != nil {
+		return err
+	}
+	return yaml.Unmarshal(content, result)
 }

@@ -1,47 +1,67 @@
 package rdbms
 
 import (
+	"sync/atomic"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/lab46/example/pkg/log"
 	_ "github.com/lib/pq"
 )
 
-type dsn struct {
-	Master string
-	Slave  string
-}
-
 // Config of database
 type Config struct {
-	DSN      map[string]dsn
-	Skipinit bool
+	DSN                string `yaml:"dsn"`
+	MaxConnections     int    `yaml:"maxconns"`
+	MaxIdleConnections int    `yaml:"maxidleconns"`
+	Pretend            bool   `yaml:"pretend"`
 }
 
-// DB of database
-type db struct {
-	connectedDbs map[dbType]*sqlx.DB
+type LoadBalancer struct {
+	dbs    []*sqlx.DB
+	length int
+	count  uint64
 }
 
-var dbObject *db
-
-// dbType is type of database
-type dbType string
-
-// Init database connection
-func Init(cfg Config) error {
-	if cfg.Skipinit {
-		return nil
+func Open(driver string, config Config) (*sqlx.DB, error) {
+	if config.Pretend {
+		db := &sqlx.DB{}
+		return db, nil
 	}
 
-	dbObject = &db{connectedDbs: make(map[dbType]*sqlx.DB)}
-	for dbName, dsn := range cfg.DSN {
-		log.Debugf("[Database] Connecting to database [%s]...", dbName)
-		newDB, err := sqlx.Open("postgres", dsn.Master+";"+dsn.Slave)
-		if err != nil {
-			log.Errorf("[Database] Failed to connect to db %s. Error: %s", dbName, err.Error())
-			return err
-		}
-		dbObject.connectedDbs[dbType(dbName)] = newDB
+	db, err := sqlx.Open(driver, config.DSN)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	// test by pinging database
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
+	if config.MaxConnections > 0 {
+		db.SetMaxOpenConns(config.MaxConnections)
+	}
+	if config.MaxIdleConnections > 0 {
+		db.SetMaxIdleConns(config.MaxIdleConnections)
+	}
+	return db, err
+}
+
+func NewLoadBalancer(sqlxDbs ...*sqlx.DB) *LoadBalancer {
+	l := &LoadBalancer{
+		dbs:    sqlxDbs,
+		length: len(sqlxDbs),
+	}
+	return l
+}
+
+func (l *LoadBalancer) GetDB() *sqlx.DB {
+	return l.dbs[l.get()]
+}
+
+// get will return number in db length with round-robin functionality
+func (l *LoadBalancer) get() int {
+	if l.length <= 1 {
+		return 0
+	}
+	db := int(1 + (atomic.AddUint64(&l.count, 1) % uint64(l.length-1)))
+	return db
 }

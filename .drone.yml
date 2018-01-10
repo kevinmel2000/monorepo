@@ -6,7 +6,7 @@ pipeline:
   test:
     image: golang:latest
     commands:
-      - export GOPATH=/go
       - go get -u github.com/golang/dep/...
       - dep ensure
+      - echo ${DRONE_COMMIT_SHA}
       - ./GoTest.sh ${DRONE_COMMIT_SHA}

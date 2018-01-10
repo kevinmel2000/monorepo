@@ -1,6 +1,12 @@
 #!/bin/bash
 
+# check commitsha from param
 commitsha=$1
+if [ "$commitsha" == "" ]; then
+    echo "commit_sha is empty"
+    exit 1
+fi
+
 echo "RUNNING: ./GoTest.sh ${commitsha}"
 filespath=()
 # get files changed in the last commit

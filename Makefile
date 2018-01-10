@@ -1,7 +1,22 @@
-build_bookapp:
+LASTCOMMIT = $(shell git log -n 1 --pretty=oneline | awk '{print $1}')
+
+# test
+
+test:
+	@./GoTest.sh $(LASTCOMMIT)
+
+test.droneio:
+	@./GoTest.sh ${DRONE_COMMIT_SHA}
+
+test.circleci:
+	@./GoTest.sh ${CIRCLE_SHA1}
+
+# go build
+
+build.bookapp:
 	@go build -o book bookapp/*.go
 
-build_rentapp:
+build.rentapp:
 	@go build -o rent rentapp/*.go
 
 ## docker specific

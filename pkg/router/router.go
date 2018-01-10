@@ -14,11 +14,6 @@ import (
 
 //Example of router package, the router wrapper is based on gorilla/mux
 
-var (
-	// for prometheus monitoring
-	prometheusSummaryVec *prometheus.SummaryVec
-)
-
 // Router of vehicle-insurance
 type Router struct {
 	opt Options
