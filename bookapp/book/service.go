@@ -17,7 +17,3 @@ func Init(masterDB *sqlx.DB, slave *rdbms.LoadBalancer) *BookService {
 	}
 	return service
 }
-
-func Handler() {
-
-}

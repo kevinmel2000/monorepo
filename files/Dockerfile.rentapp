@@ -1,6 +1,7 @@
 FROM envoyproxy/envoy:latest
 
-COPY bookapp /usr/local/bin
+COPY rentapp /usr/local/bin
+COPY ./config/rentapp /etc/rentapp
 COPY ./envoy /envoy
 COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh", "rentapp"]

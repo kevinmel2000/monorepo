@@ -1,9 +1,15 @@
-LASTCOMMIT = $(shell git log -n 1 --pretty=oneline | awk '{print $1}')
+#!bin/sh
+
+# get last commit SHA
+LASTCOMMIT = $(shell git log -n 1 --pretty=%H)
 
 # test
 
 test:
-	@./GoTest.sh $(LASTCOMMIT)
+	@./GoTest.sh "diff"
+
+test.localcommit:
+	@./GoTest.sh ${LASTCOMMIT}
 
 test.droneio:
 	@./GoTest.sh ${DRONE_COMMIT_SHA}

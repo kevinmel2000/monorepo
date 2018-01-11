@@ -1,20 +1,17 @@
 package log
 
 import (
-	"flag"
 	"strings"
 
 	"github.com/lab46/example/pkg/errors"
-	"github.com/lab46/example/pkg/flags"
 	"go.uber.org/zap"
 )
 
 // logging library using uber zap
 
 var (
-	logger    *zap.Logger
-	sugared   *zap.SugaredLogger
-	logConfig config
+	logger  *zap.Logger
+	sugared *zap.SugaredLogger
 )
 
 type level int
@@ -36,13 +33,8 @@ const (
 	FatalLevelString = "fatal"
 )
 
-type config struct {
-	logLevel string
-}
-
-func (c *config) Parse(fs *flag.FlagSet, args []string) error {
-	fs.StringVar(&c.logLevel, "log_level", "info", "logging level")
-	return fs.Parse(args)
+func init() {
+	SetLevel(InfoLevel)
 }
 
 func newZapConfig() zap.Config {
@@ -50,12 +42,6 @@ func newZapConfig() zap.Config {
 	config.DisableCaller = true
 	config.DisableStacktrace = true
 	return config
-}
-
-func FlagParse() {
-	logConfig = config{}
-	flags.Parse(&logConfig)
-	SetLevel(stringToLevel(logConfig.logLevel))
 }
 
 // SetLevel will set level to logger and create a new logger based on level

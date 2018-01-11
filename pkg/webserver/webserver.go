@@ -3,7 +3,6 @@ package webserver
 import (
 	"net/http"
 	_ "net/http/pprof"
-	"strconv"
 	"time"
 
 	"github.com/lab46/example/pkg/log"
@@ -12,7 +11,7 @@ import (
 )
 
 type Options struct {
-	Port    int
+	Port    string
 	Timeout time.Duration
 }
 
@@ -26,14 +25,19 @@ func checkOptions(opt *Options) {
 	if opt.Timeout == time.Duration(0) {
 		opt.Timeout = time.Second * 3
 	}
-	if opt.Port == 0 {
-		opt.Port = 9000
+	if len(opt.Port) > 0 {
+		// check if first string is ":"
+		if opt.Port[:1] != ":" {
+			opt.Port = ":" + opt.Port
+		}
+	} else {
+		opt.Port = ":9000"
 	}
 }
 
-func New(opt Options) WebServer {
+func New(opt Options) *WebServer {
 	checkOptions(&opt)
-	port := ":" + strconv.Itoa(opt.Port)
+	port := opt.Port
 
 	r := router.New(router.Options{Timeout: opt.Timeout})
 	// provide metrics endpoint for prometheus metrics
@@ -48,7 +52,7 @@ func New(opt Options) WebServer {
 		port:   port,
 		birth:  time.Now(),
 	}
-	return web
+	return &web
 }
 
 func (w *WebServer) Router() *router.Router {

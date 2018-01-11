@@ -57,7 +57,7 @@ func main() {
 	}
 
 	w := webserver.New(webserver.Options{
-		Port:    9000,
+		Port:    "9000",
 		Timeout: time.Second * 2,
 	})
 	httpapi.RegisterEndpoint(w.Router())

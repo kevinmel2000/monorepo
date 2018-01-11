@@ -1,0 +1,5 @@
+redisexamle:
+  address: localhost:3306
+  maxidle: 10
+  maxactive: 100
+  timeout: 1000
