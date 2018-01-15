@@ -1,12 +1,27 @@
 # Example of Go Webservice
 
-This is an example of Go microservice and how we use `drone.io` to handle multiple Go service in one repository
+This is an example of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in one repository
 
 ## Go Test & Build
 
+1. Make sure that you have Go in your system. Check the `go` command by type `go` or `go version` in the Terminal:
+```shell
+❯ go version
+go version go1.9.2 darwin/amd64
+```
+2. Make sure you have git in your system. Check by type `git` or `git version` in the Terminal:
+```shell
+❯ git version
+git version 2.11.0 (Apple Git-81)
+```
+
 All `go test` and `go build` command exist in `GoTest.sh`. The `bash-cript` will detect all changed files in one commit. And will only test and build affected packages.
 
-To run the test and build: `./GoTest.sh ${COMMIT_HASH}` or for example: `./GoTest.sh 8e876439933c60badd1f2828655dffe2c34512c8`
+This repo is using several way to Go test and build:
+1. `make test` command will trigger `@./GoTest.sh diff` command and will run test based on `git` changed/untrack files.
+2. `make test.diffmaster` will diff your current & committed branch against master and test it.
+3. `make test.circleci`/`make test.droneio` is used for continous integration and the test is running by executing `./GoTest.sh ${COMMIT_HASH}` or for example: `./GoTest.sh 8e876439933c60badd1f2828655dffe2c34512c8`.
+
 
 ## Dependencies
 
@@ -31,7 +46,3 @@ If `EXMPLENV` not exist, the default value is `dev`.
 There are two services called bookapp and rentapp. Bookapp is an app to serve list of books and Rentapp is an app to rent a book.
 
 Will provide more documentation later
-
-## Continous Integration
-
-CI Integration is running via drone.io/Drone CI

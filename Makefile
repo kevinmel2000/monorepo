@@ -2,14 +2,29 @@
 
 # get last commit SHA
 LASTCOMMIT = $(shell git log -n 1 --pretty=%H)
+CURRENT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
 # test
 
 test:
-	@./GoTest.sh "diff"
+	make test.diff
+
+test.diff:
+	@./GoTest.sh diff
+
+test.diffmaster:
+	@./GoTest.sh ${CURRENT_BRANCH} branch
 
 test.localcommit:
 	@./GoTest.sh ${LASTCOMMIT}
+
+test.dir: 
+	@echo ">>> go test based on directory"
+	@if [ -d "./$(dir)" ]; then \
+		go test -v ./$(dir)...; \
+	fi
+
+# test continous integration
 
 test.droneio:
 	@./GoTest.sh ${DRONE_COMMIT_SHA}

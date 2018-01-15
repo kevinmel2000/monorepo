@@ -5,6 +5,8 @@ import (
 	"github.com/lab46/example/pkg/rdbms"
 )
 
+var bs *BookService
+
 type BookService struct {
 	masterDB *sqlx.DB
 	slaveDB  *rdbms.LoadBalancer

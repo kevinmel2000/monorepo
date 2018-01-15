@@ -3,32 +3,17 @@ package service
 import (
 	"time"
 
-	"github.com/lab46/example/bookapp/book"
 	"github.com/lab46/example/pkg/webserver"
 )
 
 type Service struct {
-	webserver    *webserver.WebServer
-	dependencies ServiceDependencies
+	webserver *webserver.WebServer
 }
 
-type httpAPI struct {
-	dependencies *ServiceDependencies
-}
-
-type grpcService struct {
-	dependencies *ServiceDependencies
-}
-
-type ServiceDependencies struct {
-	book *book.BookService
-}
-
-func New(httpPort string, dependencies ServiceDependencies) Service {
+func New(httpPort string) Service {
 	w := webserver.New(webserver.Options{Port: httpPort, Timeout: time.Second * 2})
 	service := Service{
-		webserver:    w,
-		dependencies: dependencies,
+		webserver: w,
 	}
 	return service
 }

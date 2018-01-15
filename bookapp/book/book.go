@@ -31,7 +31,7 @@ func (b *Book) Validate() error {
 }
 
 // AddBook is a business logic layer to add a book
-func (bs *BookService) AddBook(book Book) error {
+func AddBook(book Book) error {
 	if err := book.Validate(); err != nil {
 		return err
 	}
