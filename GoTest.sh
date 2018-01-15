@@ -55,6 +55,7 @@ fi
 
 # get every path in $files list in loop/iteration
 # ex: "path1/file1.go path2/file1.go" into ["path1/file1.go", "path2/file1.go"]
+# TODO: this might enough to use sed command and improve the functionality
 filespath=()
 for path in $files
 do

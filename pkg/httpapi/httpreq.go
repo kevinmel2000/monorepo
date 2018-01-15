@@ -1,4 +1,4 @@
-package httpreq
+package httpapi
 
 import (
 	"errors"

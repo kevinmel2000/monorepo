@@ -1,8 +1,12 @@
-# Example of Go Webservice
+# Example of Go Microservice
 
-This is an example of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in one repository
+This is an example of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in one repository.
+
+All critics and feedbacks is much appreciated.
 
 ## Go Test & Build
+
+Test and build is configured around `unix` system environment. If you are using Windows or other systems, there might be some part that not works for you.
 
 1. Make sure that you have Go in your system. Check the `go` command by type `go` or `go version` in the Terminal:
 ```shell
@@ -22,7 +26,6 @@ This repo is using several way to Go test and build:
 2. `make test.diffmaster` will diff your current & committed branch against master and test it.
 3. `make test.circleci`/`make test.droneio` is used for continous integration and the test is running by executing `./GoTest.sh ${COMMIT_HASH}` or for example: `./GoTest.sh 8e876439933c60badd1f2828655dffe2c34512c8`.
 
-
 ## Dependencies
 
 Note that all dependencies and configurations made for the sake of this example project and may not suitable for your needs.
@@ -33,7 +36,7 @@ Standard Go webserver with several endpoints builtin:
 - `metrics` endpoint to expose metrics for Prometheus
 - `healthcheck` endpoint to check the health of service
 
-Internally `webserver` use `route` package to automatically expose `http-metrics` and timeout mechanism
+Internally `webserver` use `route` package and `gorilla/mux` to automatically expose `http-metrics` and add timeout mechanism
 
 ### Configuration Loader
 
@@ -45,4 +48,19 @@ If `EXMPLENV` not exist, the default value is `dev`.
 
 There are two services called bookapp and rentapp. Bookapp is an app to serve list of books and Rentapp is an app to rent a book.
 
-Will provide more documentation later
+### How to run the test
+
+1. Run `docker.compose-test.up`, this will build all go binaries needed and docker image then run docker-compose in daemon/background mode.
+2. Run `docker.compose-test.down` will take down all running container from docker-compose test.
+
+A more old and manual way: 
+
+1. You need to run `make build.all` first to build all docker image required.
+2. Run `make docker.run.all` to run all docker container.
+3. Run `make docker.stop.all` to stop all docker container and remove its dependencies.
+
+### Service to Service Communication
+
+When you run the service via container, applications will talk to each others via `envoy`. It is configured this way to provide better timeout, circuitbreaking, retry and fallback mechanism to the microservice environment. However a full service mesh is not yet introduced to the ecosystem.
+
+Envoy configuration reference: https://www.envoyproxy.io/docs/envoy/v1.5.0/intro/deployment_types/service_to_service

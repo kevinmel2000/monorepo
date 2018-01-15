@@ -1,4 +1,4 @@
-package httpreq
+package httpapi
 
 import (
 	"bytes"
@@ -8,18 +8,18 @@ import (
 	"net/http"
 )
 
-type BookHTTPClient struct {
-	client  *http.Client
-	Options ClientOptions
+type BookHTTPAPI struct {
+	httpClient *http.Client
+	Options    ClientOptions
 }
 
-func NewBookClient(options ClientOptions) (*BookHTTPClient, error) {
+func NewBookClient(options ClientOptions) (*BookHTTPAPI, error) {
 	if err := options.Validate(); err != nil {
 		return nil, err
 	}
-	b := &BookHTTPClient{
-		client:  NewHTTPClient(options.Timeout),
-		Options: options,
+	b := &BookHTTPAPI{
+		httpClient: NewHTTPClient(options.Timeout),
+		Options:    options,
 	}
 	return b, nil
 }
@@ -29,12 +29,12 @@ type Book struct {
 	Author string
 }
 
-type BookHTTPResult struct {
+type BookHTTPResponse struct {
 	Status string
 	Errors []string
 }
 
-func (book *BookHTTPClient) AddBook(ctx context.Context, bookParam Book) (*BookHTTPResult, error) {
+func (book *BookHTTPAPI) AddBook(ctx context.Context, bookParam Book) (*BookHTTPResponse, error) {
 	url := book.Options.BaseURL + "/book/v1/add"
 	jsonContent, err := json.Marshal(bookParam)
 	if err != nil {
@@ -46,7 +46,7 @@ func (book *BookHTTPClient) AddBook(ctx context.Context, bookParam Book) (*BookH
 	if err != nil {
 		return nil, err
 	}
-	resp, err := book.client.Do(req)
+	resp, err := book.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (book *BookHTTPClient) AddBook(ctx context.Context, bookParam Book) (*BookH
 		return nil, err
 	}
 
-	b := new(BookHTTPResult)
+	b := new(BookHTTPResponse)
 	err = json.Unmarshal(jsonResp, b)
 	if err != nil {
 		return nil, err

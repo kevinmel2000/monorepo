@@ -88,6 +88,16 @@ docker.stop.rentapp:
 
 ## need a better solution for run and stop all
 
+docker.compose-test.up:
+	@cd files && go build -o bookapp ../bookapp/*.go
+	@cd files && go build -o rentapp ../rentapp/*.go
+	@docker-compose -f Docker-compose.test.yaml up -d
+	@cd files && rm bookapp
+	@cd files && rm rentapp
+
+docker.compose-test.down:
+	@docker-compose -f Docker-compose.test.yaml down
+
 docker.build.all:
 	make docker.build.bookapp
 	make docker.build.rentapp
