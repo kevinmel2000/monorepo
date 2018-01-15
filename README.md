@@ -4,6 +4,11 @@ This is an example of Go microservice and how we use `circleci`/`drone.io` to ha
 
 All critics and feedbacks is much appreciated.
 
+| CI | Status |
+| ---- | ----------- |
+| [CircleCI](https://circleci.com/gh/lab46/example) | [![CircleCI](https://circleci.com/gh/lab46/example.svg?style=svg)](https://circleci.com/gh/lab46/example) |
+| [drone.io](http://droneio.albertwidi.com/lab46/example) | [![drone.io Build Status](http://droneio.albertwidi.com/api/badges/lab46/example/status.svg?branch=master)](http://droneio.albertwidi.com/lab46/example) |
+
 ## Go Test & Build
 
 Test and build is configured around `unix` system environment. If you are using Windows or other systems, there might be some part that not works for you.
@@ -32,7 +37,7 @@ Note that all dependencies and configurations made for the sake of this example 
 
 ### Webserver
 
-Standard Go webserver with several endpoints builtin:
+Standard Go webserver with several builtin endpoints:
 - `metrics` endpoint to expose metrics for Prometheus
 - `healthcheck` endpoint to check the health of service
 
@@ -50,8 +55,8 @@ There are two services called bookapp and rentapp. Bookapp is an app to serve li
 
 ### How to run the test
 
-1. Run `docker.compose-test.up`, this will build all go binaries needed and docker image then run docker-compose in daemon/background mode.
-2. Run `docker.compose-test.down` will take down all running container from docker-compose test.
+1. Run `make docker.compose-test.up`, this will build all go binaries needed and docker image then run docker-compose in daemon/background mode.
+2. Run `make docker.compose-test.down` will take down all running container from docker-compose test.
 
 A more old and manual way: 
 

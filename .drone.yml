@@ -3,7 +3,7 @@ workspace:
   path: src/github.com/lab46/example
 
 pipeline:
-  test:
+  build:
     image: golang:latest
     commands:
       - go get -u github.com/golang/dep/...
