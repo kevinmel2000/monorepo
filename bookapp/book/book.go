@@ -31,10 +31,15 @@ func (b *Book) Validate() error {
 }
 
 // AddBook is a business logic layer to add a book
-func AddBook(book Book) error {
+func (bs *BookService) AddBook(book Book) error {
 	if err := book.Validate(); err != nil {
 		return err
 	}
 	// data layer to save a book
 	return bs.saveBook(book)
+}
+
+func (bs *BookService) ListOfBooks() ([]Book, error) {
+	books, err := bs.getBooks()
+	return books, err
 }

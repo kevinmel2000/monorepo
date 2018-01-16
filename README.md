@@ -1,6 +1,6 @@
 # Example of Go Microservice
 
-This is an example of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in one repository.
+This is an example of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in single repository.
 
 All critics and feedbacks is much appreciated.
 
@@ -24,7 +24,7 @@ go version go1.9.2 darwin/amd64
 git version 2.11.0 (Apple Git-81)
 ```
 
-All `go test` and `go build` command exist in `GoTest.sh`. The `bash-cript` will detect all changed files in one commit. And will only test and build affected packages.
+All `go test` and `go build` command exist in `GoTest.sh`. The `bash-script` will detect all changed files in one commit. And will only test and build affected packages.
 
 This repo is using several way to Go test and build:
 1. `make test` command will trigger `@./GoTest.sh diff` command and will run test based on `git` changed/untrack files.
@@ -53,7 +53,7 @@ If `EXMPLENV` not exist, the default value is `dev`.
 
 There are two services called bookapp and rentapp. Bookapp is an app to serve list of books and Rentapp is an app to rent a book.
 
-### How to run the test
+### How to run the service in test mode
 
 1. Run `make docker.compose-test.up`, this will build all go binaries needed and docker image then run docker-compose in daemon/background mode.
 2. Run `make docker.compose-test.down` will take down all running container from docker-compose test.

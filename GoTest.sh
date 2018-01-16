@@ -15,6 +15,7 @@ fi
 # get all go packages in repo
 # sometimes go list will print _/$GOPATH/src/project package instead $GOPATH/src/project/package
 # need to trim _/$GOPATH/src before go test and go build can run
+# TODO: remove loop and trim with sed completely
 go_packages=()
 files_to_test="$(go list ./... | grep -v /vendor/)"
 for file in $files_to_test

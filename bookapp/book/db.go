@@ -15,3 +15,11 @@ func (bs *BookService) saveBook(book Book) error {
 	_, err = p.Exec(book.Title, book.Author)
 	return err
 }
+
+const getBooksQuery = "SELECT id, title, author FROM book"
+
+func (bs *BookService) getBooks() ([]Book, error) {
+	books := []Book{}
+	err := bs.slaveDB.GetDB().Select(&books, getBooksQuery)
+	return books, err
+}

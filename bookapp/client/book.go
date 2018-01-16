@@ -1,4 +1,4 @@
-package httpapi
+package client
 
 import (
 	"bytes"
@@ -6,19 +6,21 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/lab46/example/pkg/httpclient"
 )
 
 type BookHTTPAPI struct {
 	httpClient *http.Client
-	Options    ClientOptions
+	Options    httpclient.ClientOptions
 }
 
-func NewBookClient(options ClientOptions) (*BookHTTPAPI, error) {
+func NewBookClient(options httpclient.ClientOptions) (*BookHTTPAPI, error) {
 	if err := options.Validate(); err != nil {
 		return nil, err
 	}
 	b := &BookHTTPAPI{
-		httpClient: NewHTTPClient(options.Timeout),
+		httpClient: httpclient.NewHTTPClient(options.Timeout),
 		Options:    options,
 	}
 	return b, nil
@@ -42,7 +44,7 @@ func (book *BookHTTPAPI) AddBook(ctx context.Context, bookParam Book) (*BookHTTP
 	}
 	buff := bytes.NewBuffer(jsonContent)
 
-	req, err := NewRequestWithHostHeader("POST", url, book.Options.HostHeader, buff)
+	req, err := httpclient.NewRequestWithHostHeader(http.MethodPost, url, book.Options.HostHeader, buff)
 	if err != nil {
 		return nil, err
 	}

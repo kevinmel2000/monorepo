@@ -1,4 +1,4 @@
-package httpapi
+package client
 
 import (
 	"bytes"
@@ -6,19 +6,21 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/lab46/example/pkg/httpclient"
 )
 
 type RentHTTPAPI struct {
 	httpClient *http.Client
-	Options    ClientOptions
+	Options    httpclient.ClientOptions
 }
 
-func NewRentClient(options ClientOptions) (*RentHTTPAPI, error) {
+func NewRentClient(options httpclient.ClientOptions) (*RentHTTPAPI, error) {
 	if err := options.Validate(); err != nil {
 		return nil, err
 	}
 	b := &RentHTTPAPI{
-		httpClient: NewHTTPClient(options.Timeout),
+		httpClient: httpclient.NewHTTPClient(options.Timeout),
 		Options:    options,
 	}
 	return b, nil
@@ -42,7 +44,7 @@ func (rnt *RentHTTPAPI) RentBook(ctx context.Context, rent Rent) (*RentHTTPRespo
 	}
 	buff := bytes.NewBuffer(jsonContent)
 
-	req, err := NewRequestWithHostHeader("POST", url, rnt.Options.HostHeader, buff)
+	req, err := httpclient.NewRequestWithHostHeader("POST", url, rnt.Options.HostHeader, buff)
 	if err != nil {
 		return nil, err
 	}

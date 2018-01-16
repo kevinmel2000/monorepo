@@ -5,32 +5,34 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/lab46/example/bookapp/book"
+	"github.com/lab46/example/bookapp/service"
 	"github.com/lab46/example/pkg/config"
 	"github.com/lab46/example/pkg/flags"
 	"github.com/lab46/example/pkg/log"
 	"github.com/lab46/example/pkg/rdbms"
-	"github.com/lab46/example/pkg/webserver"
-	"github.com/lab46/example/rentapp/httpapi"
 )
 
-func initDependencies() error {
+func initService() (*service.Service, error) {
 	serviceConfig, err := LoadConfig()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	masterDB, err := rdbms.Open("postgres", serviceConfig.Postgres.MasterExampleDB)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	slaveDB, err := rdbms.Open("postgres", serviceConfig.Postgres.SlaveExampleDB)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	// init package
 	book.Init(masterDB, rdbms.NewLoadBalancer(slaveDB))
-	return err
+	// create new service
+	s := service.New("9000")
+	return s, err
 }
 
 type serviceFlags struct {
@@ -52,19 +54,14 @@ func main() {
 	log.SetLevelString(sf.logLevel)
 	config.SetConfigDir(sf.configDir)
 
-	if err := initDependencies(); err != nil {
+	s, err := initService()
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	w := webserver.New(webserver.Options{
-		Port:    "9000",
-		Timeout: time.Second * 2,
-	})
-	httpapi.RegisterEndpoint(w.Router())
-
 	fatalChan := make(chan error)
 	go func() {
-		fatalChan <- w.Run()
+		fatalChan <- s.RunWebserver()
 	}()
 
 	term := make(chan os.Signal, 1)

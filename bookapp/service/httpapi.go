@@ -1,11 +1,9 @@
 package service
 
-import "net/http"
-
 func (s *Service) registerHTTPApi() {
-	s.webserver.Router().Get("/something", s.HandlerSomething)
-}
+	// create subrouter for api/book/v1
+	r := s.webserver.Router()
+	r = r.SubRouter("/api/book/v1")
 
-func (s *Service) HandlerSomething(w http.ResponseWriter, r *http.Request) {
-
+	r.Get("/list", bookList)
 }
