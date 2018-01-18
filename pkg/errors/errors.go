@@ -1,6 +1,6 @@
 package errors
 
-// errors package inspired and a subset copy of upspin project
+// errors package inspired and a subset copy of errors package in upspin project
 
 import (
 	"errors"

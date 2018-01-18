@@ -7,6 +7,11 @@ jobs:
     docker:
       # specify the version
       - image: circleci/golang:1.9
+      - image: postgres:9.6.2-alpine
+        environment:
+          LC_ALL: C.UTF-8
+          POSTGRES_USER: exampleapp
+          POSTGRES_PASSWORD: exampleapp
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -20,6 +25,14 @@ jobs:
     working_directory: /go/src/github.com/lab46/example
     steps:
       - checkout
+      # - run:
+      #     name: install dockerize
+      #     command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+      #     environment:
+      #       DOCKERIZE_VERSION: v0.3.0
+      - run:
+          name: Wait for db
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
 
       # specify any bash command here prefixed with `run: `
       - run: go get -u github.com/golang/dep/...
@@ -28,5 +41,3 @@ jobs:
           name: Run unit tests
           command: |
             make test.circleci
-      # - run: go get -v -t -d ./...
-      # - run: go test -v ./...

@@ -10,4 +10,11 @@ pipeline:
       - dep ensure
       - echo ${DRONE_BRANCH} ${DRONE_COMMIT_SHA}
       - make test.droneio
-      # - ./GoTest.sh ${DRONE_COMMIT_SHA}
+
+services:
+  database:
+    image: postgres
+    environment:
+      - POSTGRES_USER=exampleapp
+      - POSTGRES_DB=exampleapp
+      - LC_ALL=C.UTF-8

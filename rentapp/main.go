@@ -1,22 +1,67 @@
 package main
 
 import (
-	"log"
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/lab46/example/pkg/webserver"
-	"github.com/lab46/example/rentapp/httpapi"
+	"github.com/lab46/example/rentapp/rent"
+	"github.com/lab46/example/rentapp/service"
+	"github.com/lab46/example/pkg/config"
+	"github.com/lab46/example/pkg/flags"
+	"github.com/lab46/example/pkg/log"
+	"github.com/lab46/example/pkg/rdbms"
 )
 
+func initService() (*service.Service, error) {
+	serviceConfig, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+	masterDB, err := rdbms.Open("postgres", serviceConfig.Postgres.MasterExampleDB)
+	if err != nil {
+		return nil, err
+	}
+	slaveDB, err := rdbms.Open("postgres", serviceConfig.Postgres.SlaveExampleDB)
+	if err != nil {
+		return nil, err
+	}
+
+	// init package
+	book.Init(masterDB, rdbms.NewLoadBalancer(slaveDB))
+	// create new service
+	s := service.New("9000")
+	return s, err
+}
+
+type serviceFlags struct {
+	logLevel  string
+	configDir string
+}
+
+var sf serviceFlags
+
+func (sf *serviceFlags) Parse(fs *flag.FlagSet, args []string) error {
+	fs.StringVar(&sf.logLevel, "log_level", "", "logging level")
+	fs.StringVar(&sf.configDir, "config_dir", "", "configuration directory")
+	return fs.Parse(args)
+}
+
 func main() {
-	w := webserver.New(webserver.Options{})
-	httpapi.RegisterEndpoint(w.Router())
+	sf = serviceFlags{}
+	flags.Parse(&sf)
+	log.SetLevelString(sf.logLevel)
+	config.SetConfigDir(sf.configDir)
+
+	s, err := initService()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fatalChan := make(chan error)
 	go func() {
-		fatalChan <- w.Run()
+		fatalChan <- s.RunWebserver()
 	}()
 
 	term := make(chan os.Signal, 1)

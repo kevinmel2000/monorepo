@@ -1,6 +1,8 @@
+**/*.go
 /book
 /rent
 /repotest
+/example
 files/bookapp
 files/rentapp
 vendor

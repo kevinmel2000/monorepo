@@ -1,7 +1,9 @@
 package rdbms
 
 import (
+	"context"
 	"sync/atomic"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -28,7 +30,9 @@ func Open(driver string, config Config) (*sqlx.DB, error) {
 		return db, nil
 	}
 
-	db, err := sqlx.Open(driver, config.DSN)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	db, err := sqlx.ConnectContext(ctx, driver, config.DSN)
 	if err != nil {
 		return nil, err
 	}

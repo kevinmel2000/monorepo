@@ -27,9 +27,13 @@ test.dir:
 # test continous integration
 
 test.droneio:
+	@echo ">>> waiting for dependencies"
+	@sleep 5
 	@./GoTest.sh ${DRONE_COMMIT_SHA}
 
 test.circleci:
+	@echo ">>> waiting for dependencies"
+	@sleep 5
 	@./GoTest.sh ${CIRCLE_SHA1}
 
 # go build
@@ -89,8 +93,8 @@ docker.stop.rentapp:
 ## need a better solution for run and stop all
 
 docker.compose-test.up:
-	@cd files && go build -o bookapp ../bookapp/*.go
-	@cd files && go build -o rentapp ../rentapp/*.go
+	@cd files && go build -v -o bookapp ../bookapp/*.go
+	@cd files && go build -v -o rentapp ../rentapp/*.go
 	@docker-compose -f Docker-compose.test.yaml up -d
 	@cd files && rm bookapp
 	@cd files && rm rentapp

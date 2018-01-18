@@ -1,6 +1,6 @@
 # Example of Go Microservice
 
-This is an example of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in single repository.
+This is an example and experiment of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in single repository.
 
 All critics and feedbacks is much appreciated.
 
@@ -21,7 +21,7 @@ go version go1.9.2 darwin/amd64
 2. Make sure you have git in your system. Check by type `git` or `git version` in the Terminal:
 ```shell
 ❯ git version
-git version 2.11.0 (Apple Git-81)
+git version 2.11.0 (Apple Git-81)   
 ```
 
 All `go test` and `go build` command exist in `GoTest.sh`. The `bash-script` will detect all changed files in one commit. And will only test and build affected packages.
@@ -48,6 +48,10 @@ Internally `webserver` use `route` package and `gorilla/mux` to automatically ex
 Configurations depends on `EXMPLENV` environment variable and all configuration file must be in `*.yaml` format.
 
 If `EXMPLENV` not exist, the default value is `dev`.
+
+## Testutil - Sqlimporter 
+
+Sqlimporter is used to create a random database or schema and import *.sql files schema.
 
 ## Bookapp and Rentapp
 
