@@ -60,8 +60,7 @@ func CreateDB(driver, dbName, dsn string) (*sqlx.DB, func() error, error) {
 	}
 
 	// use new db
-	useDatabaseQuery := fmt.Sprintf(getDialect(driver, "use"), dbName)
-	_, err = db.Exec(useDatabaseQuery)
+	err = selectDB(db, dbName)
 	if err != nil {
 		return nil, defaultDrop, err
 	}
@@ -73,6 +72,14 @@ func CreateDB(driver, dbName, dsn string) (*sqlx.DB, func() error, error) {
 		}
 		return db.Close()
 	}, nil
+}
+
+// selectDB for selecting database/schema
+func selectDB(db *sqlx.DB, dbName string) error {
+	// use new db
+	useDatabaseQuery := fmt.Sprintf(getDialect(db.DriverName(), "use"), dbName)
+	_, err := db.Exec(useDatabaseQuery)
+	return err
 }
 
 // ImportSchemaFromFiles to import all *.sql file from directory

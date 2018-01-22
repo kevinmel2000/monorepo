@@ -13,6 +13,8 @@ All critics and feedbacks is much appreciated.
 
 Test and build is configured around `unix` system environment. If you are using Windows or other systems, there might be some part that not works for you.
 
+All test is structured and being build around `git` version control environment.
+
 1. Make sure that you have Go in your system. Check the `go` command by type `go` or `go version` in the Terminal:
 ```shell
 ❯ go version

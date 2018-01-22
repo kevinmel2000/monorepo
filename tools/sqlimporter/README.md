@@ -1,6 +1,6 @@
 # SQLImporter CLI
 
-SQLImporter command line tools used to import schema from *.sql files in a directory
+SQLImporter command line tools used to import schema from *.sql files in a directory with a special rules in *.sql file. For reference: [sqlimporter library](https://github.com/lab46/example/blob/master/pkg/testutil/sqlimporter/README.md)
 
 This tools might useful if your environment don't have any postgresql/mysql command installed but have your database running in a container.
 
@@ -26,7 +26,6 @@ Flags:
 
 Use "sqlimporter [command] --help" for more information about a command.
 ```
-
 
 To import a schema into a database:
 

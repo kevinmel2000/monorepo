@@ -42,15 +42,20 @@ func main() {
 func registerImporterCommand(root *cobra.Command) {
 	cmds := []*cobra.Command{
 		{
-			Use:   "import [driver] [dsn] [directory]",
+			Use:   "import [driver] [dbname] [dsn] [directory]",
 			Short: "import postgresql/mysql schema from directory",
 			Args:  cobra.MinimumNArgs(3),
 			Run: func(c *cobra.Command, args []string) {
-				db, err := sqlimporter.Connect(args[0], args[1])
+				driver := args[0]
+				dbName := args[1]
+				dsn := args[2]
+				dir := args[3]
+
+				db, _, err := sqlimporter.CreateDB(driver, dbName, dsn)
 				print.Fatal(err)
-				err = sqlimporter.ImportSchemaFromFiles(db, args[2])
+				err = sqlimporter.ImportSchemaFromFiles(db, dir)
 				print.Fatal(err)
-				print.Info("Successfully import schema from", args[2])
+				print.Info("Successfully import schema from", dir)
 			},
 		},
 		{
