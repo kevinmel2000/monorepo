@@ -3,8 +3,26 @@ package book
 // book.go contains all business logic in handling book
 
 import (
+	"github.com/jmoiron/sqlx"
 	"github.com/lab46/example/pkg/errors"
+	"github.com/lab46/example/pkg/rdbms"
 )
+
+// a package level variable to hold dependencies in the package
+var bookService *BookService
+
+type BookService struct {
+	masterDB *sqlx.DB
+	slaveDB  *rdbms.LoadBalancer
+}
+
+func Init(masterDB *sqlx.DB, slave *rdbms.LoadBalancer) *BookService {
+	bookService = &BookService{
+		masterDB: masterDB,
+		slaveDB:  slave,
+	}
+	return bookService
+}
 
 type Book struct {
 	ID     int64  `db:"id"`
@@ -31,15 +49,21 @@ func (b *Book) Validate() error {
 }
 
 // AddBook is a business logic layer to add a book
-func (bs *BookService) AddBook(book Book) error {
+func AddBook(book Book) error {
 	if err := book.Validate(); err != nil {
 		return err
 	}
 	// data layer to save a book
-	return bs.saveBook(book)
+	return bookService.saveBook(book)
 }
 
-func (bs *BookService) ListOfBooks() ([]Book, error) {
-	books, err := bs.getBooks()
+func ListOfBooks() ([]Book, error) {
+	books, err := bookService.getBooks()
 	return books, err
+}
+
+func GetBookByID(id int64) (Book, error) {
+	book := Book{}
+	book, err := bookService.getBookByID(id)
+	return book, err
 }

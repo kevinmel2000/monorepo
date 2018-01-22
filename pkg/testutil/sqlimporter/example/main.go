@@ -14,7 +14,7 @@ func main() {
 	dsn := "postgres://exampleapp:exampleapp@localhost:5432?sslmode=disable"
 	// dsn := "user=exampleapp password=exampleapp host=127.0.0.1:5432 dbname=exampleapp sslmode=disable"
 	// db, err := sqlx.Open("postgres", dsn)
-	db, err, _ := sqlimporter.CreateDB("postgres", dsn)
+	db, drop, err := sqlimporter.CreateDB("postgres", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,10 +23,10 @@ func main() {
 		log.Fatal("Failed to import ", err.Error())
 	}
 	defer func() {
-		// err := drop()
-		// if err != nil {
-		// log.Printf("Failed to drop. Error: %s", err.Error())
-		// }
+		err := drop()
+		if err != nil {
+			log.Printf("Failed to drop. Error: %s", err.Error())
+		}
 	}()
 	err = db.Ping()
 	if err != nil {

@@ -32,9 +32,16 @@ test.droneio:
 	@./GoTest.sh ${DRONE_COMMIT_SHA}
 
 test.circleci:
-	@echo ">>> waiting for dependencies"
-	@sleep 5
 	@./GoTest.sh ${CIRCLE_SHA1}
+
+test.circleold:
+	@if [ "${CIRCLECI_RETRY}" = "" ]; then \
+		echo "test CIRCLE_SHA1"; \
+		./GoTest.sh ${CIRCLE_SHA1}; \
+	else \
+		echo "test CIRCLECI_RETRY_SHA1"; \
+		./GoTest.sh ${CIRCLECI_RETRY_SHA1}; \
+	fi
 
 # go build
 
@@ -43,6 +50,9 @@ build.bookapp:
 
 build.rentapp:
 	@go build -o rent rentapp/*.go
+
+build.sqlimporter.cli:
+	@go build -o sqlimporter pkg/testutil/sqlimporter/cli/*.go	
 
 ## docker specific
 
@@ -93,8 +103,8 @@ docker.stop.rentapp:
 ## need a better solution for run and stop all
 
 docker.compose-test.up:
-	@cd files && go build -v -o bookapp ../bookapp/*.go
-	@cd files && go build -v -o rentapp ../rentapp/*.go
+	@cd files && GOOS=linux go build -v -o bookapp ../bookapp/*.go
+	@cd files && GOOS=linux go build -v -o rentapp ../rentapp/*.go
 	@docker-compose -f Docker-compose.test.yaml up -d
 	@cd files && rm bookapp
 	@cd files && rm rentapp
@@ -116,4 +126,4 @@ docker.stop.all:
 	-docker rm -f bookapp
 	-docker stop rentapp
 	-docker rm -f rentapp
-	-docker network rm localnet
+	-docker network rm localnet	

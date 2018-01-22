@@ -18,6 +18,15 @@ func init() {
 	internalServerErrorResp, _ = json.Marshal(internalServerErr)
 }
 
+func StatusOK(w http.ResponseWriter) {
+	resp := map[string]interface{}{
+		"status": "OK",
+	}
+	jsonResp, _ := json.Marshal(resp)
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResp)
+}
+
 func InternalServerError(w http.ResponseWriter, errString ...string) {
 	status := http.StatusInternalServerError
 	resp := map[string]interface{}{

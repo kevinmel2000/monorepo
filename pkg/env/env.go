@@ -8,10 +8,16 @@ import (
 	"github.com/lab46/example/pkg/log"
 )
 
+type ServiceEnv string
+
 const (
-	DevelopmentEnv = "dev"
-	StagingEnv     = "staging"
-	ProductionEnv  = "prod"
+	DevelopmentEnv ServiceEnv = "dev"
+	StagingEnv     ServiceEnv = "staging"
+	ProductionEnv  ServiceEnv = "prod"
+)
+
+var (
+	envName = "EXMPLENV"
 )
 
 // env package will read .env file when applicatino is started
@@ -51,11 +57,22 @@ func SetFromEnvFile(filepath string) error {
 	return nil
 }
 
+func SetEnvName(name string) {
+	envName = name
+}
+
+func EnvList() []ServiceEnv {
+	return []ServiceEnv{DevelopmentEnv, StagingEnv, ProductionEnv}
+}
+
+func SetCurrentServiceEnv(env ServiceEnv) error {
+	return Setenv(envName, string(env))
+}
+
 func GetCurrentServiceEnv() string {
-	key := "EXMPLENV"
-	e := Getenv(key)
+	e := Getenv(envName)
 	if e == "" {
-		e = DevelopmentEnv
+		e = string(DevelopmentEnv)
 	}
 	return e
 }

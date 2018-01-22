@@ -6,12 +6,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/lab46/example/rentapp/rent"
-	"github.com/lab46/example/rentapp/service"
+	"github.com/lab46/example/bookapp/book"
 	"github.com/lab46/example/pkg/config"
 	"github.com/lab46/example/pkg/flags"
 	"github.com/lab46/example/pkg/log"
 	"github.com/lab46/example/pkg/rdbms"
+	"github.com/lab46/example/rentapp/service"
 )
 
 func initService() (*service.Service, error) {

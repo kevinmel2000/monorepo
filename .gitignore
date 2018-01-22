@@ -1,8 +1,10 @@
-**/*.go
 /book
 /rent
 /repotest
 /example
+/cli
+/sqlimporter
 files/bookapp
 files/rentapp
 vendor
+test.sh

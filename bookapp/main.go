@@ -8,7 +8,7 @@ import (
 
 	"github.com/lab46/example/bookapp/book"
 	"github.com/lab46/example/bookapp/service"
-	"github.com/lab46/example/pkg/config"
+	"github.com/lab46/example/pkg/env"
 	"github.com/lab46/example/pkg/flags"
 	"github.com/lab46/example/pkg/log"
 	"github.com/lab46/example/pkg/rdbms"
@@ -52,7 +52,7 @@ func main() {
 	sf = serviceFlags{}
 	flags.Parse(&sf)
 	log.SetLevelString(sf.logLevel)
-	config.SetConfigDir(sf.configDir)
+	env.SetConfigDir(sf.configDir)
 
 	s, err := initService()
 	if err != nil {

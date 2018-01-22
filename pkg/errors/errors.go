@@ -4,7 +4,6 @@ package errors
 
 import (
 	"errors"
-	"net/http"
 	"runtime"
 
 	"log"
@@ -201,40 +200,4 @@ func Match(errs1, errs2 error) bool {
 type Codes interface {
 	ErrorAndCode() (string, int)
 	Err() error
-}
-
-// Default implementation of Codes
-type DefaultCodes int
-
-const (
-	Other DefaultCodes = iota
-	DatabaseError
-	RedisError
-	ServiceNotAvailableError
-	RequestTimeOutError
-)
-
-var _ Codes = (DefaultCodes)(Other)
-
-// ErrorAndCode will return
-func (c DefaultCodes) ErrorAndCode() (string, int) {
-	switch c {
-	case Other:
-		return "Internal server error", http.StatusInternalServerError
-	case DatabaseError:
-		return "Database error", http.StatusInternalServerError
-	case RedisError:
-		return "Redis error", http.StatusInternalServerError
-	case ServiceNotAvailableError:
-		return "Service not available", http.StatusInternalServerError
-	case RequestTimeOutError:
-		return "Request timed out", http.StatusRequestTimeout
-	default:
-		return "Internal server error", http.StatusInternalServerError
-	}
-}
-
-func (c DefaultCodes) Err() error {
-	err, _ := c.ErrorAndCode()
-	return New(err)
 }

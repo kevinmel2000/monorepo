@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"io/ioutil"
 	"os"
 	"path"
@@ -18,11 +17,6 @@ type config struct {
 }
 
 var cfg config
-
-func (c *config) Parse(fs *flag.FlagSet, args []string) error {
-	fs.StringVar(&c.Path, "config_path", "", "configuration path")
-	return fs.Parse(args)
-}
 
 func init() {
 	cfg.Env = env.GetCurrentServiceEnv()
@@ -44,7 +38,7 @@ func GetPath() string {
 func LoadYamlConfig(result interface{}, filename string) error {
 	dirEnv := strings.ToLower(cfg.Env)
 	if dirEnv == "" {
-		dirEnv = env.DevelopmentEnv
+		dirEnv = string(env.DevelopmentEnv)
 	}
 	confPath := path.Join(cfg.Path, dirEnv, filename)
 	log.Debugf("load config from: %s", confPath)

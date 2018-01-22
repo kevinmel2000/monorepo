@@ -24,12 +24,47 @@ go version go1.9.2 darwin/amd64
 git version 2.11.0 (Apple Git-81)   
 ```
 
+3. Make sure you have docker in your system. Check by type `docker` or `docker version` in the Terminal:
+```shell
+❯ docker version
+Client:
+ Version:      17.09.0-ce
+ API version:  1.32
+ Go version:   go1.8.3
+ Git commit:   afdb6d4
+ Built:        Tue Sep 26 22:40:09 2017
+ OS/Arch:      darwin/amd64
+
+Server:
+ Version:      17.09.0-ce
+ API version:  1.32 (minimum version 1.12)
+ Go version:   go1.8.3
+ Git commit:   afdb6d4
+ Built:        Tue Sep 26 22:45:38 2017
+ OS/Arch:      linux/amd64
+ Experimental: true
+```
+
+4. Start the dependencies first by using `docker-compose` command: `docker-compose up -d`.
+```shell
+❯ docker-compose up -d
+Creating network "example_default" with the default driver
+Creating example_redis_1 ...
+Creating example_postgres_1 ...
+Creating example_redis_1
+Creating example_redis_1 ... done
+```
+
 All `go test` and `go build` command exist in `GoTest.sh`. The `bash-script` will detect all changed files in one commit. And will only test and build affected packages.
 
 This repo is using several way to Go test and build:
 1. `make test` command will trigger `@./GoTest.sh diff` command and will run test based on `git` changed/untrack files.
 2. `make test.diffmaster` will diff your current & committed branch against master and test it.
 3. `make test.circleci`/`make test.droneio` is used for continous integration and the test is running by executing `./GoTest.sh ${COMMIT_HASH}` or for example: `./GoTest.sh 8e876439933c60badd1f2828655dffe2c34512c8`.
+
+### Unit Test & Integration Test
+
+This project use docker and CI to provide database instance(postgresql). Instead mock the database conection, we are test the schema directly to database by using `sqlimporter`
 
 ## Dependencies
 
@@ -49,9 +84,11 @@ Configurations depends on `EXMPLENV` environment variable and all configuration 
 
 If `EXMPLENV` not exist, the default value is `dev`.
 
-## Testutil - Sqlimporter 
+### Testutil - Sqlimporter 
 
 Sqlimporter is used to create a random database or schema and import *.sql files schema.
+
+The database/schema can be dropped directly after being used for a test.
 
 ## Bookapp and Rentapp
 

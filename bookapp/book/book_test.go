@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/lab46/example/pkg/rdbms"
-
 	"github.com/lab46/example/pkg/testutil/sqlimporter"
 )
 
@@ -16,7 +15,7 @@ var (
 )
 
 func TestAddBook(t *testing.T) {
-	db, err, drop := sqlimporter.CreateDB(testDriver, testDSN)
+	db, drop, err := sqlimporter.CreateDB(testDriver, testDSN)
 	if err != nil {
 		t.Error(err)
 	}
@@ -27,8 +26,8 @@ func TestAddBook(t *testing.T) {
 		t.Error(err)
 	}
 
-	bs := Init(db, rdbms.NewLoadBalancer(db))
-	err = bs.AddBook(Book{
+	Init(db, rdbms.NewLoadBalancer(db))
+	err = AddBook(Book{
 		Title:  "test1",
 		Author: "author1",
 	})
@@ -38,7 +37,7 @@ func TestAddBook(t *testing.T) {
 }
 
 func TestListOfBooks(t *testing.T) {
-	db, err, drop := sqlimporter.CreateDB(testDriver, testDSN)
+	db, drop, err := sqlimporter.CreateDB(testDriver, testDSN)
 	if err != nil {
 		t.Error(err)
 	}
@@ -53,12 +52,38 @@ func TestListOfBooks(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bs := Init(db, rdbms.NewLoadBalancer(db))
-	books, err := bs.ListOfBooks()
+	Init(db, rdbms.NewLoadBalancer(db))
+	books, err := ListOfBooks()
 	if err != nil {
 		t.Error(err)
 	}
 	if len(books) != 2 {
 		t.Errorf("Got %d books, but expecting 2 from test file", len(books))
+	}
+}
+
+func TestGetBookyID(t *testing.T) {
+	db, drop, err := sqlimporter.CreateDB(testDriver, testDSN)
+	if err != nil {
+		t.Error(err)
+	}
+	defer drop()
+	// import schema
+	err = sqlimporter.ImportSchemaFromFiles(db, schemaPath)
+	if err != nil {
+		t.Error(err)
+	}
+	// import data
+	err = sqlimporter.ImportSchemaFromFiles(db, dataPath)
+	if err != nil {
+		t.Error(err)
+	}
+	Init(db, rdbms.NewLoadBalancer(db))
+	b, err := GetBookByID(1)
+	if err != nil {
+		t.Error(err)
+	}
+	if b.Title == "" {
+		t.Error("book title cannot be empty")
 	}
 }

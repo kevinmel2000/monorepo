@@ -23,3 +23,11 @@ func (bs *BookService) getBooks() ([]Book, error) {
 	err := bs.slaveDB.GetDB().Select(&books, getBooksQuery)
 	return books, err
 }
+
+const getBookByIDQuery = "SELECT id, title, author FROM book WHERE id = $1"
+
+func (bs *BookService) getBookByID(id int64) (Book, error) {
+	book := Book{}
+	err := bs.slaveDB.GetDB().Get(&book, getBookByIDQuery, id)
+	return book, err
+}

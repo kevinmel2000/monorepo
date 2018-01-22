@@ -30,6 +30,7 @@ func NewHTTPClient(options httpclient.ClientOptions) (*BookHTTPAPI, error) {
 }
 
 type Book struct {
+	ID     int64
 	Name   string
 	Author string
 }

@@ -16,7 +16,7 @@ func createDSN() string {
 	return ""
 }
 
-func connect(driver, dsn string) (*sqlx.DB, error) {
+func Connect(driver, dsn string) (*sqlx.DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 	db, err := sqlx.ConnectContext(ctx, driver, dsn)
@@ -28,15 +28,15 @@ func connect(driver, dsn string) (*sqlx.DB, error) {
 
 const DBNameDefault = "SQL_IMPORTER_DB_"
 
-// CreateDatabaseAndImport used to create database
+// CreateDB used to create database
 // and import all queries located in a directories
-func CreateDB(driver, dsn string) (*sqlx.DB, error, func() error) {
+func CreateDB(driver, dsn string) (*sqlx.DB, func() error, error) {
 	defaultDrop := func() error {
 		return nil
 	}
-	db, err := connect(driver, dsn)
+	db, err := Connect(driver, dsn)
 	if err != nil {
-		return nil, err, defaultDrop
+		return nil, defaultDrop, err
 	}
 
 	// create a new database
@@ -50,23 +50,23 @@ func CreateDB(driver, dsn string) (*sqlx.DB, error, func() error) {
 	// exec create new b
 	_, err = db.Exec(createDBQuery)
 	if err != nil {
-		return nil, err, defaultDrop
+		return nil, defaultDrop, err
 	}
 
 	// use new db
 	useDatabaseQuery := fmt.Sprintf(getDialect(driver, "use"), dbName)
 	_, err = db.Exec(useDatabaseQuery)
 	if err != nil {
-		return nil, err, defaultDrop
+		return nil, defaultDrop, err
 	}
-	return db, nil, func() error {
+	return db, func() error {
 		deleteDatabaseQuery := fmt.Sprintf(getDialect(driver, "drop"), dbName)
 		_, err := db.Exec(deleteDatabaseQuery)
 		if err != nil {
 			return err
 		}
 		return db.Close()
-	}
+	}, nil
 }
 
 // ImportSchemaFromFiles
