@@ -12,8 +12,7 @@ import (
 var (
 	// global variable from global flags
 	VerboseFlag bool
-	// time when init ssi
-	timeStart time.Time
+	timeStart   time.Time
 )
 
 func initCMD() *cobra.Command {

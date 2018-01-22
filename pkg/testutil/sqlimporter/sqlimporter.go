@@ -16,6 +16,7 @@ func createDSN() string {
 	return ""
 }
 
+// Connect to database
 func Connect(driver, dsn string) (*sqlx.DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
@@ -26,11 +27,23 @@ func Connect(driver, dsn string) (*sqlx.DB, error) {
 	return db, db.Ping()
 }
 
+// DBNameDefault default database name for sqlimporter
 const DBNameDefault = "SQL_IMPORTER_DB_"
+
+// CreateRandomDB for creating a database name/schema for test
+func CreateRandomDB(driver, dsn string) (*sqlx.DB, func() error, error) {
+	// create a new database
+	// database name is always a random name
+	unix := time.Now().Unix()
+	randSource := rand.NewSource(unix)
+	r := rand.New(randSource)
+	dbName := DBNameDefault + strconv.Itoa(r.Int())
+	return CreateDB(driver, dbName, dsn)
+}
 
 // CreateDB used to create database
 // and import all queries located in a directories
-func CreateDB(driver, dsn string) (*sqlx.DB, func() error, error) {
+func CreateDB(driver, dbName, dsn string) (*sqlx.DB, func() error, error) {
 	defaultDrop := func() error {
 		return nil
 	}
@@ -39,13 +52,6 @@ func CreateDB(driver, dsn string) (*sqlx.DB, func() error, error) {
 		return nil, defaultDrop, err
 	}
 
-	// create a new database
-	// database name is always a random name
-	unix := time.Now().Unix()
-	randSource := rand.NewSource(unix)
-	r := rand.New(randSource)
-	dbName := DBNameDefault + strconv.Itoa(r.Int())
-	// TODO: separate this, this is a dialect and might be not the same with other db
 	createDBQuery := fmt.Sprintf(getDialect(driver, "create"), dbName)
 	// exec create new b
 	_, err = db.Exec(createDBQuery)
@@ -69,7 +75,7 @@ func CreateDB(driver, dsn string) (*sqlx.DB, func() error, error) {
 	}, nil
 }
 
-// ImportSchemaFromFiles
+// ImportSchemaFromFiles to import all *.sql file from directory
 func ImportSchemaFromFiles(db *sqlx.DB, filepath string) error {
 	files, err := getFileList(filepath)
 	if err != nil {

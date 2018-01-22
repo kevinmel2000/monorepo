@@ -15,7 +15,7 @@ var (
 )
 
 func TestAddBook(t *testing.T) {
-	db, drop, err := sqlimporter.CreateDB(testDriver, testDSN)
+	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testDSN)
 	if err != nil {
 		t.Error(err)
 	}
@@ -37,7 +37,7 @@ func TestAddBook(t *testing.T) {
 }
 
 func TestListOfBooks(t *testing.T) {
-	db, drop, err := sqlimporter.CreateDB(testDriver, testDSN)
+	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testDSN)
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,7 +63,7 @@ func TestListOfBooks(t *testing.T) {
 }
 
 func TestGetBookyID(t *testing.T) {
-	db, drop, err := sqlimporter.CreateDB(testDriver, testDSN)
+	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testDSN)
 	if err != nil {
 		t.Error(err)
 	}
