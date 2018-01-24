@@ -7,4 +7,5 @@
 files/bookapp
 files/rentapp
 vendor
+.vscode
 test.sh
