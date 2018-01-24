@@ -10,8 +10,9 @@ import (
 // logging library using uber zap
 
 var (
-	logger  *zap.Logger
-	sugared *zap.SugaredLogger
+	logger       *zap.Logger
+	sugared      *zap.SugaredLogger
+	currentLevel level
 )
 
 type level int
@@ -65,6 +66,12 @@ func SetLevel(l level) {
 	defer logger.Sync()
 	sugared = logger.Sugar()
 	defer sugared.Sync()
+	currentLevel = l
+}
+
+// GetLevel return log level in string
+func GetLevel() string {
+	return levelToString(currentLevel)
 }
 
 func SetLevelString(l string) {
@@ -85,6 +92,23 @@ func stringToLevel(s string) level {
 		return FatalLevel
 	default:
 		return InfoLevel
+	}
+}
+
+func levelToString(l level) string {
+	switch l {
+	case DebugLevel:
+		return DebugLevelString
+	case InfoLevel:
+		return InfoLevelString
+	case WarnLevel:
+		return WarnLevelString
+	case ErrorLevel:
+		return ErrorLevelString
+	case FatalLevel:
+		return FatalLevelString
+	default:
+		return InfoLevelString
 	}
 }
 

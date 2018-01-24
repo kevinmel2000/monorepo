@@ -34,10 +34,8 @@ const DBNameDefault = "SQL_IMPORTER_DB_"
 func CreateRandomDB(driver, dsn string) (*sqlx.DB, func() error, error) {
 	// create a new database
 	// database name is always a random name
-	unix := time.Now().Unix()
-	randSource := rand.NewSource(unix)
-	r := rand.New(randSource)
-	dbName := DBNameDefault + strconv.Itoa(r.Int())
+	rand.Seed(time.Now().UnixNano())
+	dbName := DBNameDefault + strconv.FormatInt(rand.Int63(), 10)
 	return CreateDB(driver, dbName, dsn)
 }
 

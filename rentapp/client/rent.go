@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/lab46/example/pkg/httpclient"
+	"github.com/lab46/example/pkg/http/httpclient"
 )
 
 type RentHTTPAPI struct {

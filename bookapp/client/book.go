@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/lab46/example/bookapp/book"
-	"github.com/lab46/example/pkg/httpclient"
+	"github.com/lab46/example/pkg/http/httpclient"
 )
 
 type BookHTTPAPI struct {

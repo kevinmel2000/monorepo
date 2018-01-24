@@ -75,7 +75,7 @@ set -e
 # do test and build
 for test_pkg in ${go_test_pkg[@]}
 do
-    test="go test -v -race $test_pkg"
+    test="go test -v -race -parallel 2 $test_pkg"
     $test
     build="go build -v $test_pkg/..."
     $build

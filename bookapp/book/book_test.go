@@ -5,17 +5,18 @@ import (
 
 	"github.com/lab46/example/pkg/rdbms"
 	"github.com/lab46/example/pkg/testutil/sqlimporter"
+	"github.com/lab46/example/pkg/testutil/testenv"
 )
 
 var (
-	testDSN    = "postgres://exampleapp:exampleapp@localhost:5432?sslmode=disable"
 	testDriver = "postgres"
 	schemaPath = "../../files/dbschema/book"
 	dataPath   = "testdata"
 )
 
 func TestAddBook(t *testing.T) {
-	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testDSN)
+	t.Parallel()
+	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testenv.EnvConfig.PostgresDSN)
 	if err != nil {
 		t.Error(err)
 	}
@@ -37,7 +38,8 @@ func TestAddBook(t *testing.T) {
 }
 
 func TestListOfBooks(t *testing.T) {
-	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testDSN)
+	t.Parallel()
+	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testenv.EnvConfig.PostgresDSN)
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,7 +65,8 @@ func TestListOfBooks(t *testing.T) {
 }
 
 func TestGetBookyID(t *testing.T) {
-	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testDSN)
+	t.Parallel()
+	db, drop, err := sqlimporter.CreateRandomDB(testDriver, testenv.EnvConfig.PostgresDSN)
 	if err != nil {
 		t.Error(err)
 	}

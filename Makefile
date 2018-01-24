@@ -27,8 +27,6 @@ test.dir:
 # test continous integration
 
 test.droneio:
-	@echo ">>> waiting for dependencies"
-	@sleep 5
 	@./GoTest.sh ${DRONE_COMMIT_SHA}
 
 test.circleci:
@@ -41,7 +39,7 @@ test.circleold:
 	else \
 		echo "test CIRCLECI_RETRY_SHA1"; \
 		./GoTest.sh ${CIRCLECI_RETRY_SHA1}; \
-	fi
+	fi	
 
 # go build
 

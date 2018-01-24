@@ -29,11 +29,8 @@ Use "sqlimporter [command] --help" for more information about a command.
 
 To import a schema into a database:
 
-`sqlimporter [driver] [dbname] [dsn] [directory]`
+`sqlimporter import [driver] [dbname] [dsn] [directory]`
 
 or for example:
 
 `sqlimporter import book postgres "postgres://exampleapp:exampleapp@localhost:5432?sslmode=disable" "files/dbschema/book/"`
-
-
-

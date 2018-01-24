@@ -1,10 +1,12 @@
 package webserver
 
 import (
+	"encoding/json"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
 
+	"github.com/lab46/example/pkg/env"
 	"github.com/lab46/example/pkg/log"
 	"github.com/lab46/example/pkg/router"
 	"github.com/prometheus/client_golang/prometheus"
@@ -46,6 +48,20 @@ func New(opt Options) *WebServer {
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
+	})
+	r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
+		currentEnv := env.GetCurrentServiceEnv()
+		configDir := env.GetConfigDir()
+		logLevel := log.GetLevel()
+
+		response := map[string]interface{}{
+			"environemnt": currentEnv,
+			"config":      configDir,
+			"log_level":   logLevel,
+		}
+		jsonResp, _ := json.Marshal(response)
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonResp)
 	})
 	web := WebServer{
 		router: r,

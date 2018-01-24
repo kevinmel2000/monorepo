@@ -2,7 +2,9 @@
 
 This is an example and experiment of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in single repository.
 
-All critics and feedbacks is much appreciated.
+The case is there are about 30 engineers that is working in a team and this type of repository and we have various products/services to do and maintain. What being made here is probably a bit spohisticated, because we need to maintain the ecosystem around the repo. 
+
+Open to discussions and all critics + feedbacks is much appreciated.
 
 | CI | Status |
 | ---- | ----------- |
@@ -77,6 +79,7 @@ Note that all dependencies and configurations made for the sake of this example 
 Standard Go webserver with several builtin endpoints:
 - `metrics` endpoint to expose metrics for Prometheus
 - `healthcheck` endpoint to check the health of service
+- `status` endpoint to expose current service env and configuration
 
 Internally `webserver` use `route` package and `gorilla/mux` to automatically expose `http-metrics` and add timeout mechanism
 

@@ -51,10 +51,16 @@ func registerImporterCommand(root *cobra.Command) {
 				dsn := args[2]
 				dir := args[3]
 
-				db, _, err := sqlimporter.CreateDB(driver, dbName, dsn)
+				db, drop, err := sqlimporter.CreateDB(driver, dbName, dsn)
 				print.Fatal(err)
 				err = sqlimporter.ImportSchemaFromFiles(db, dir)
-				print.Fatal(err)
+				if err != nil {
+					print.Error(err)
+					err = drop()
+					print.Fatal(err)
+					// exit
+					print.Fatal(fmt.Errorf("Failed to execute sql files, dropping database %s", dbName))
+				}
 				print.Info("Successfully import schema from", dir)
 			},
 		},

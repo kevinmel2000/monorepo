@@ -2,6 +2,7 @@ package rdbms
 
 import (
 	"context"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -16,6 +17,7 @@ type Config struct {
 	MaxConnections     int    `yaml:"maxconns"`
 	MaxIdleConnections int    `yaml:"maxidleconns"`
 	Pretend            bool   `yaml:"pretend"`
+	Retry              int    `yaml:"retry"`
 }
 
 type LoadBalancer struct {
@@ -30,12 +32,25 @@ func Open(driver string, config Config) (*sqlx.DB, error) {
 		return db, nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-	db, err := sqlx.ConnectContext(ctx, driver, config.DSN)
-	if err != nil {
-		return nil, err
+	var (
+		err error
+		db  *sqlx.DB
+	)
+	// retry mechanism
+	for x := 0; x < config.Retry; x++ {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+		db, err = sqlx.ConnectContext(ctx, driver, config.DSN)
+		if err == nil {
+			cancel()
+			break
+		}
+		// else continue with condition
+		cancel()
+		if x+1 == config.Retry && err != nil {
+			return nil, fmt.Errorf("Failed connect to database: %s", err.Error())
+		}
 	}
+
 	// test by pinging database
 	if err := db.Ping(); err != nil {
 		return nil, err

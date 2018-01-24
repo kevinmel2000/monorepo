@@ -3,10 +3,8 @@ masterexample:
   maxconns: 100
   maxidleconns: 10
   retry: 5
-  pretend: true
 slaveexample:
   dsn: "something"
   maxconns: 100
   maxidleconns: 10
   retry: 5
-  pretend: true
