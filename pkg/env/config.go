@@ -46,7 +46,7 @@ func LoadYamlConfig(result interface{}, filename string) error {
 		dirEnv = string(DevelopmentEnv)
 	}
 	confDir := path.Join(cfg.Dir, dirEnv, filename)
-	log.Debugf("load config from: %s", confDir)
+	log.Debugf("[config][yaml] from: %s", confDir)
 	content, err := ioutil.ReadFile(confDir)
 	if err != nil {
 		return err

@@ -3,6 +3,7 @@ package env
 import (
 	"bufio"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/lab46/example/pkg/log"
@@ -17,7 +18,9 @@ const (
 )
 
 var (
-	envName = "EXMPLENV"
+	envName      = "EXMPLENV"
+	currentBuild = "unavailable"
+	goVersion    string
 )
 
 // env package will read .env file when applicatino is started
@@ -27,6 +30,7 @@ func init() {
 	if err != nil {
 		log.Debug(err)
 	}
+	goVersion = runtime.Version()
 }
 
 func SetFromEnvFile(filepath string) error {
@@ -83,4 +87,19 @@ func Getenv(key string) string {
 
 func Setenv(key, value string) error {
 	return os.Setenv(key, value)
+}
+
+// SetCurrentBuild to determine the latest build of
+func SetCurrentBuild(buildnumber string) {
+	currentBuild = buildnumber
+}
+
+// GetCurrentBuild return the current build number
+func GetCurrentBuild() string {
+	return currentBuild
+}
+
+// GetGoVersion to return current build go version
+func GetGoVersion() string {
+	return goVersion
 }

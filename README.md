@@ -2,7 +2,7 @@
 
 This is an example and experiment of Go microservice and how we use `circleci`/`drone.io` to handle multiple Go service in single repository.
 
-The case is there are about 30 engineers that is working in a team and this type of repository and we have various products/services to do and maintain. What being made here is probably a bit spohisticated, because we need to maintain the ecosystem around the repo. 
+The case is there are more than 30 engineers that is working in a big team/tribe and this type of repository and we have various products/services to do and maintain.
 
 Open to discussions and all critics + feedbacks is much appreciated.
 
@@ -13,7 +13,7 @@ Open to discussions and all critics + feedbacks is much appreciated.
 
 ## Go Test & Build
 
-Test and build is configured around `unix` system environment. If you are using Windows or other systems, there might be some part that not works for you.
+Test and build is configured around `unix` system environment. If you are using Windows or other systems, there might be some parts that not works for you.
 
 All test is structured and being build around `git` version control environment.
 

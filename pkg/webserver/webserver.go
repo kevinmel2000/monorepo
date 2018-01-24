@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	_ "net/http/pprof"
+	"strconv"
 	"time"
 
 	"github.com/lab46/example/pkg/env"
@@ -13,7 +14,7 @@ import (
 )
 
 type Options struct {
-	Port    string
+	Address string
 	Timeout time.Duration
 }
 
@@ -27,19 +28,23 @@ func checkOptions(opt *Options) {
 	if opt.Timeout == time.Duration(0) {
 		opt.Timeout = time.Second * 3
 	}
-	if len(opt.Port) > 0 {
-		// check if first string is ":"
-		if opt.Port[:1] != ":" {
-			opt.Port = ":" + opt.Port
+	if len(opt.Address) > 0 {
+		_, err := strconv.Atoi(opt.Address)
+		// address is pure port number
+		if err == nil {
+			// check if first string is ":"
+			if opt.Address[:1] != ":" {
+				opt.Address = ":" + opt.Address
+			}
 		}
 	} else {
-		opt.Port = ":9000"
+		opt.Address = ":9000"
 	}
 }
 
 func New(opt Options) *WebServer {
 	checkOptions(&opt)
-	port := opt.Port
+	address := opt.Address
 
 	r := router.New(router.Options{Timeout: opt.Timeout})
 	// provide metrics endpoint for prometheus metrics
@@ -49,23 +54,29 @@ func New(opt Options) *WebServer {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
+	// provide status of service when running
 	r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
 		currentEnv := env.GetCurrentServiceEnv()
 		configDir := env.GetConfigDir()
+		buildNumber := env.GetCurrentBuild()
 		logLevel := log.GetLevel()
+		goVersion := env.GetGoVersion()
 
 		response := map[string]interface{}{
 			"environemnt": currentEnv,
 			"config":      configDir,
 			"log_level":   logLevel,
+			"go_version":  goVersion,
+			"build":       buildNumber,
 		}
 		jsonResp, _ := json.Marshal(response)
 		w.WriteHeader(http.StatusOK)
+		w.Header().Set("content-type", "application/json")
 		w.Write(jsonResp)
 	})
 	web := WebServer{
 		router: r,
-		port:   port,
+		port:   address,
 		birth:  time.Now(),
 	}
 	return &web
@@ -76,6 +87,6 @@ func (w *WebServer) Router() *router.Router {
 }
 
 func (w *WebServer) Run() error {
-	log.Infof("Webserver running on port %s", w.port)
+	log.Infof("Webserver serving on: %s", w.port)
 	return http.ListenAndServe(w.port, w.router)
 }

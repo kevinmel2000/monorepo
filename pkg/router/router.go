@@ -20,7 +20,7 @@ type Router struct {
 	r   *mux.Router
 }
 
-// Option for router
+// Options for router
 type Options struct {
 	Timeout time.Duration
 }
@@ -52,7 +52,6 @@ func (rtr Router) SubRouter(pathPrefix string) *Router {
 
 // timeout middleware
 // the timeout middleware should cover timeout budget
-// this is needed because the budget will determine it should open a breaker or not
 func (rtr *Router) timeout(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		opt := rtr.opt
@@ -118,36 +117,37 @@ func sanitizeStatusCode(status int) string {
 
 // Get function
 func (rtr Router) Get(pattern string, h http.HandlerFunc) {
-	log.Debugf("[GET] %s", pattern)
+	log.Debugf("[router][get] %s", pattern)
 	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("GET")
 }
 
 // Post function
 func (rtr Router) Post(pattern string, h http.HandlerFunc) {
-	log.Debugf("[POST] %s", pattern)
+	log.Debugf("[router][post] %s", pattern)
 	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("POST")
 }
 
 // Put function
 func (rtr Router) Put(pattern string, h http.HandlerFunc) {
-	log.Debugf("[PUT] %s", pattern)
+	log.Debugf("[router][put] %s", pattern)
 	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("PUT")
 }
 
 // Delete function
 func (rtr Router) Delete(pattern string, h http.HandlerFunc) {
-	log.Debugf("[DELETE] %s", pattern)
+	log.Debugf("[router][delete] %s", pattern)
 	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("DELETE")
 }
 
 // Patch function
 func (rtr Router) Patch(pattern string, h http.HandlerFunc) {
-	log.Debugf("[PATCH] %s", pattern)
+	log.Debugf("[router][patch] %s", pattern)
 	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("PATCH")
 }
 
+// Handle function
 func (rtr Router) Handle(pattern string, h http.Handler) {
-	log.Debugf("[HANDLE] %s", pattern)
+	log.Debugf("[router][handle] %s", pattern)
 	rtr.r.Handle(pattern, h)
 }
 

@@ -11,12 +11,6 @@ if [[ "$commitsha" == "" ]]; then
     exit 1
 fi
 
-# get all go packages in repo
-# sometimes go list will print _/$GOPATH/src/project package instead $GOPATH/src/project/package
-# need to trim _/$GOPATH/src before go test and go build can run
-# example: echo _/Users/Valge/Go/src/github.com/lab46/example/pkg/webserver | sed 's/\_\/Users\/Valge\/Go\/src\///'
-go_packages="$(go list ./... | grep -v /vendor/ | sed "s/\_$gopath//")"
-
 # for debug purposes
 echo "RUNNING: ./GoTest.sh ${commitsha} ${type}"
 
@@ -35,7 +29,7 @@ else
     fi 
 fi
 
-if  [ "$files" = "" ]; then
+if  [[ "$files" = "" ]]; then
     echo ">>> no files detected, exiting test..."
     exit 0
 fi
@@ -48,9 +42,14 @@ do
     # trim filepath, only get the package name
     filespath+=("$(echo $path | rev | cut -d"/" -f2-  | rev)")
 done
-
 # get unique path from array of string
 unique_path=($(echo "${filespath[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+
+# get all go packages in repo
+# sometimes go list will print _/$GOPATH/src/project package instead $GOPATH/src/project/package
+# need to trim _/$GOPATH/src before go test and go build can run
+# example: echo _/Users/Valge/Go/src/github.com/lab46/example/pkg/webserver | sed 's/\_\/Users\/Valge\/Go\/src\///'
+go_packages="$(go list ./... | grep -v /vendor/ | sed "s/\_$gopath//")"
 
 # looks for go test path
 # need to improve this, very2 slow
