@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/lab46/example/bookapp/book"
 	"github.com/lab46/example/gopkg/http/httpclient"
+	"github.com/lab46/example/service/bookapp/book"
 )
 
 type BookHTTPAPI struct {
@@ -23,7 +23,7 @@ func NewHTTPClient(options httpclient.ClientOptions) (*BookHTTPAPI, error) {
 		return nil, err
 	}
 	b := &BookHTTPAPI{
-		httpClient: httpclient.NewClient(options.Timeout),
+		httpClient: httpclient.New(options.Timeout),
 		Options:    options,
 	}
 	return b, nil

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/lab46/example/pkg/env"
-	"github.com/lab46/example/pkg/rdbms"
-	"github.com/lab46/example/pkg/redis"
+	"github.com/lab46/example/gopkg/env"
+	"github.com/lab46/example/gopkg/redis"
+	"github.com/lab46/example/gopkg/sqldb"
+	"gitlab.kumparan.com/go-lib/rdbms"
 )
 
 type ServiceConfig struct {
@@ -12,7 +13,7 @@ type ServiceConfig struct {
 }
 
 type PostgresConfig struct {
-	MasterExampleDB rdbms.Config `yaml:"masterexample"`
+	MasterExampleDB sqldb.Config `yaml:"masterexample"`
 	SlaveExampleDB  rdbms.Config `yaml:"slaveexample"`
 }
 

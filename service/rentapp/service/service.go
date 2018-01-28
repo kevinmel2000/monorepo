@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"github.com/lab46/example/pkg/webserver"
+	"github.com/lab46/example/gopkg/webserver"
 )
 
 type Service struct {

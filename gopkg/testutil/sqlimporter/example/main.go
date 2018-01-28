@@ -5,7 +5,7 @@ package main
 import (
 	"log"
 
-	"github.com/lab46/example/pkg/testutil/sqlimporter"
+	"github.com/lab46/example/gopkg/testutil/sqlimporter"
 	_ "github.com/lib/pq"
 	// "github.com/lab46/example/pkg/testutil/sqlimporter"
 )

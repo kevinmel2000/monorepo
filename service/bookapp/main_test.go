@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/lab46/example/pkg/env"
+	"github.com/lab46/example/gopkg/env"
 )
 
 func TestLoadConfig(t *testing.T) {

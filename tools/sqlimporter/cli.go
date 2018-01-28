@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lab46/example/pkg/print"
-	"github.com/lab46/example/pkg/testutil/sqlimporter"
+	"github.com/lab46/example/gopkg/print"
+	"github.com/lab46/example/gopkg/testutil/sqlimporter"
 	"github.com/spf13/cobra"
 )
 
