@@ -7,7 +7,7 @@ import (
 )
 
 func TestSetAndGetConfigDir(t *testing.T) {
-	dir := "../../files/config/testconfig"
+	dir := "../../files/testfile/yamlconfig"
 	err := env.SetConfigDir(dir)
 	if err != nil {
 		t.Error(err)
@@ -19,17 +19,18 @@ func TestSetAndGetConfigDir(t *testing.T) {
 }
 
 func TestLoadYamlConfig(t *testing.T) {
-	configDir := "../../files/config/testconfig"
+	configDir := "../../files/testfile/yamlconfig"
 	err := env.SetConfigDir(configDir)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	tc := struct {
 		test struct {
 			key1 string `yaml:"key1"`
 		}
 	}{}
-	err = env.LoadYamlConfig(&tc, "test.yml")
+	err = env.LoadYamlConfig(&tc, "test.yaml")
 	if err != nil {
 		t.Error(err)
 	}

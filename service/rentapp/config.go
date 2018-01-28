@@ -4,7 +4,6 @@ import (
 	"github.com/lab46/example/gopkg/env"
 	"github.com/lab46/example/gopkg/redis"
 	"github.com/lab46/example/gopkg/sqldb"
-	"gitlab.kumparan.com/go-lib/rdbms"
 )
 
 type ServiceConfig struct {
@@ -14,7 +13,7 @@ type ServiceConfig struct {
 
 type PostgresConfig struct {
 	MasterExampleDB sqldb.Config `yaml:"masterexample"`
-	SlaveExampleDB  rdbms.Config `yaml:"slaveexample"`
+	SlaveExampleDB  sqldb.Config `yaml:"slaveexample"`
 }
 
 type RedisConfig struct {

@@ -10,7 +10,7 @@ import (
 
 var (
 	testDriver = "postgres"
-	schemaPath = "../../files/dbschema/book"
+	schemaPath = "../../../files/dbschema/book"
 	dataPath   = "testdata"
 )
 
