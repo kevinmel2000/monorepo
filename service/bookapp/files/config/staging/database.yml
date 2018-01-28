@@ -1,0 +1,8 @@
+masterexample:
+  dsn: "something"
+  maxconns: 100
+  maxidleconns: 10
+slaveexample:
+  dsn: "something"
+  maxconns: 100
+  maxidleconns: 10

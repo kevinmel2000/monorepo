@@ -1,0 +1,10 @@
+masterexample:
+  dsn: "something"
+  maxconns: 100
+  maxidleconns: 10
+  pretend: true
+slaveexample:
+  dsn: "something"
+  maxconns: 100
+  maxidleconns: 10
+  pretend: true
