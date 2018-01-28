@@ -41,16 +41,18 @@ test.circleold:
 		./GoTest.sh ${CIRCLECI_RETRY_SHA1}; \
 	fi	
 
-# go build
+# go build & run
 
-build.bookapp:
-	@go build -o book bookapp/*.go
+go.build.service:
+	@go build -o $(name) service/$(name)/*.go
 
-build.rentapp:
-	@go build -o rent rentapp/*.go
+go.build.tools:
+	@go build -o $(name) tools/$(name)/*.go
 
-build.sqlimporter.cli:
-	@go build -o sqlimporter pkg/testutil/sqlimporter/cli/*.go	
+go.run.service:
+	make go.build.service $(name)
+	@EXMPLENV=$(env) ./$(name) -log_level=debug -config_dir=service/$(name)/files/config
+
 
 ## docker specific
 
