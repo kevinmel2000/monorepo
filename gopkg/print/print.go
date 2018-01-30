@@ -9,19 +9,37 @@ import (
 )
 
 // this package is used to produce pretty print output
-// mostly used by ssi-cli app
+// mostly used by cli app
 // all print should go to stdout instead of stderr
 
 // var for printing prefix, this is naive and need a better implementation
 var (
-	prefixInfo  = func(prefix string) string { return color.GreenString("[INFO]" + prefix) }
-	prefixDebug = func(prefix string) string { return color.YellowString("[DEBUG]" + prefix) }
-	prefixWarn  = func(prefix string) string { return color.HiCyanString("[WARN]" + prefix) }
-	prefixError = func(prefix string) string { return color.RedString("[ERROR]" + prefix) }
+	prefixPrint = func(prePrefix, prefix string) string {
+		return color.HiMagentaString(fmt.Sprintf("%s", prePrefix) + prefix)
+	}
+	prefixDebug = func(prePrefix, prefix string) string {
+		return color.YellowString(fmt.Sprintf("%s", prePrefix) + prefix)
+	}
+	prefixInfo = func(prePrefix, prefix string) string {
+		return color.GreenString(fmt.Sprintf("%s", prePrefix) + prefix)
+	}
+	prefixWarn = func(prePrefix, prefix string) string {
+		return color.HiCyanString(fmt.Sprintf("%s", prePrefix) + prefix)
+	}
+	prefixError = func(prePrefix, prefix string) string {
+		return color.RedString(fmt.Sprintf("%s", prePrefix) + prefix)
+	}
+	// debug var to identify if debug print is allowed or not
+	isDebug bool
 )
 
-// debug var to identify if debug print is allowed or not
-var isDebug bool
+// list of pre-prefix
+const (
+	InfoPrePrefix  = "[INFO]"
+	DebugPrePrefix = "[DEBUG]"
+	WarnPrePrepix  = "[WARN]"
+	ErrorPrePrefix = "[ERROR]"
+)
 
 func SetDebug(debug bool) {
 	isDebug = debug
@@ -32,19 +50,19 @@ func Debug(v ...interface{}) {
 	if !isDebug {
 		return
 	}
-	print(prefixDebug(""), v...)
+	print(prefixDebug(DebugPrePrefix, ""), v...)
 }
 
 func Info(v ...interface{}) {
-	print(prefixInfo(""), v...)
+	print(prefixInfo(InfoPrePrefix, ""), v...)
 }
 
 func Warn(v ...interface{}) {
-	print(prefixWarn(""), v...)
+	print(prefixWarn(WarnPrePrepix, ""), v...)
 }
 
 func Error(v ...interface{}) {
-	print(prefixError(""), v...)
+	print(prefixError(ErrorPrePrefix, ""), v...)
 }
 
 func Fatal(err error) {

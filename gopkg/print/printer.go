@@ -14,23 +14,27 @@ func WithPrefix(prefix string) *Printer {
 	}
 }
 
+func (p *Printer) Print(v ...interface{}) {
+	print(prefixPrint("", p.prefix), v...)
+}
+
 func (p *Printer) Debug(v ...interface{}) {
 	if !isDebug {
 		return
 	}
-	print(prefixDebug(p.prefix), v...)
+	print(prefixDebug(DebugPrePrefix, p.prefix), v...)
 }
 
 func (p *Printer) Info(v ...interface{}) {
-	print(prefixInfo(p.prefix), v...)
+	print(prefixInfo(InfoPrePrefix, p.prefix), v...)
 }
 
 func (p *Printer) Warn(v ...interface{}) {
-	print(prefixWarn(p.prefix), v...)
+	print(prefixWarn(WarnPrePrepix, p.prefix), v...)
 }
 
 func (p *Printer) Error(v ...interface{}) {
-	print(prefixError(p.prefix), v...)
+	print(prefixError(ErrorPrePrefix, p.prefix), v...)
 }
 
 func (p *Printer) Fatal(err error) {

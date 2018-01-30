@@ -11,6 +11,7 @@ pipeline:
       - go get -u github.com/jwilder/dockerize/...
       - go get -u github.com/golang/dep/...
       - dep ensure -v -vendor-only
+      - go install github.com/lab46/example/tools/git-test
       - dockerize -wait tcp://database:5432 -timeout 1m
       - echo ${DRONE_BRANCH} ${DRONE_COMMIT_SHA}
       - make test.droneio

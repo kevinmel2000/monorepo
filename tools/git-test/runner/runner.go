@@ -1,7 +1,10 @@
 package runner
 
 import (
+	"fmt"
 	"os"
+
+	"github.com/lab46/example/gopkg/print"
 
 	"github.com/lab46/example/tools/git-test/repo"
 	"github.com/lab46/example/tools/git-test/task"
@@ -13,6 +16,8 @@ func TriggerServiceRunner(dir repo.Dir) error {
 	if err != nil {
 		return err
 	}
+
+	print.Info(fmt.Sprintf("[RUNNER] Switching to %s", dir.Name))
 	err = os.Chdir(dir.Name)
 	if err != nil {
 		return err

@@ -11,6 +11,7 @@ test:
 
 test.diff:
 	@./GoTest.sh diff
+	@git-test diff
 
 test.diffmaster:
 	@./GoTest.sh ${CURRENT_BRANCH} branch
@@ -28,9 +29,11 @@ test.dir:
 
 test.droneio:
 	@./GoTest.sh ${DRONE_COMMIT_SHA}
+	@git-test commit ${CIRCLE_SHA1}
 
 test.circleci:
 	@./GoTest.sh ${CIRCLE_SHA1}
+	@git-test commit ${CIRCLE_SHA1}
 
 test.circleold:
 	@if [ "${CIRCLECI_RETRY}" = "" ]; then \

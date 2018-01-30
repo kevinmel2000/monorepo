@@ -38,6 +38,7 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: go get -u github.com/golang/dep/...
       - run: dep ensure -v -vendor-only
+      - run: go install github.com/lab46/example/tools/git-test
       - run:
           name: Run unit tests
           command: |
