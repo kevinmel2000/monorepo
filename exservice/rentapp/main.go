@@ -6,12 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/lab46/example/exservice/rentapp/service"
 	"github.com/lab46/example/gopkg/env"
 	"github.com/lab46/example/gopkg/flags"
 	"github.com/lab46/example/gopkg/log"
 	"github.com/lab46/example/gopkg/sqldb"
-	"github.com/lab46/example/service/bookapp/book"
-	"github.com/lab46/example/service/bookapp/service"
 )
 
 func initService() (*service.Service, error) {
@@ -19,17 +18,15 @@ func initService() (*service.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	masterDB, err := sqldb.Open("postgres", serviceConfig.Postgres.MasterExampleDB)
+	_, err = sqldb.Open("postgres", serviceConfig.Postgres.MasterExampleDB)
 	if err != nil {
 		return nil, err
 	}
-	slaveDB, err := sqldb.Open("postgres", serviceConfig.Postgres.SlaveExampleDB)
+	_, err = sqldb.Open("postgres", serviceConfig.Postgres.SlaveExampleDB)
 	if err != nil {
 		return nil, err
 	}
 
-	// init package
-	book.Init(masterDB, sqldb.NewLoadBalancer(slaveDB))
 	// create new service
 	s := service.New("9000")
 	return s, err

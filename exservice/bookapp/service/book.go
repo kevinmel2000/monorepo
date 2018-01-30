@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/lab46/example/exservice/bookapp/book"
 	"github.com/lab46/example/gopkg/http/httpresponse"
-	"github.com/lab46/example/service/bookapp/book"
 )
 
 func addBook(w http.ResponseWriter, r *http.Request) {

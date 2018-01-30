@@ -28,4 +28,3 @@ scrape_configs:
       format: ['prometheus']
     static_configs:
       - targets: ['bookapp:8001', 'rentapp:8001']
-      

@@ -6,8 +6,11 @@
 /example
 /cli
 /sqlimporter
+/git-test
+
 files/bookapp
 files/rentapp
 vendor
+
 .vscode
 test.sh

@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/lab46/example/exservice/bookapp/book"
 	"github.com/lab46/example/gopkg/http/httpclient"
-	"github.com/lab46/example/service/bookapp/book"
 )
 
 type BookHTTPAPI struct {

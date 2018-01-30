@@ -49,7 +49,7 @@ unique_path=($(echo "${filespath[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 # sometimes go list will print _/$GOPATH/src/project package instead $GOPATH/src/project/package
 # need to trim _/$GOPATH/src before go test and go build can run
 # example: echo _/Users/Valge/Go/src/github.com/lab46/example/pkg/webserver | sed 's/\_\/Users\/Valge\/Go\/src\///'
-go_packages="$(go list ./... | grep -v /vendor/ | sed "s/\_$gopath//")"
+go_packages="$(go list ./... | grep -v exservice | grep -v /vendor/ | sed "s/\_$gopath//")"
 
 # looks for go test path
 # need to improve this, very2 slow
@@ -68,6 +68,10 @@ if [[ "$(echo ${go_test_pkg[@]})" = "" ]]; then
     echo ">>> no Go package detected, exiting test..."
     exit 0
 fi
+
+# TODO: review the script and check where trhings get doubled
+# a hack, need to identify where things goes wrong
+go_test_pkg=($(echo "${go_test_pkg[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
 #set exit when test failed
 set -e

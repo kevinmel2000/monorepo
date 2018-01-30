@@ -20,7 +20,7 @@ func NewRentClient(options httpclient.ClientOptions) (*RentHTTPAPI, error) {
 		return nil, err
 	}
 	b := &RentHTTPAPI{
-		httpClient: httpclient.NewClient(options.Timeout),
+		httpClient: httpclient.New(options.Timeout),
 		Options:    options,
 	}
 	return b, nil
