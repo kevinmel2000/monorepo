@@ -4,58 +4,99 @@
 LASTCOMMIT = $(shell git log -n 1 --pretty=%H)
 CURRENT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 
+# repo
+
+repo.setup:
+	@go get -v -u github.com/golang/dep/cmd/dep
+	@dep ensure -v --vendor-only
+	make tools.update
+
 # test
 
 test:
 	make test.diff
 
 test.diff:
+	@set -e
 	@./GoTest.sh diff
 	@git-test diff
 
-test.diffmaster:
-	@./GoTest.sh ${CURRENT_BRANCH} branch
+test.commit:
+	@./GoTest.sh $(commit)
+	@git-test commit $(commit)
 
-test.localcommit:
-	@./GoTest.sh ${LASTCOMMIT}
+test.env:
+	@echo "Build Parameters:"
+	@echo "MONOREPO_SERVICE=$$MONOREPO_SERVICE"
+
+# test.diffmaster:
+# 	@./GoTest.sh ${CURRENT_BRANCH} branch
+
+test.commit.local:
+	make test commit=${LASTCOMMIT}
 
 test.dir: 
 	@echo ">>> go test based on directory"
-	@if [ -d "./$(dir)" ]; then \
+	@if [[ -d "./$(dir)" ]]; then \
 		go test -v ./$(dir)...; \
 	fi
 
-# test continous integration
+test.service:
+	@git-test service $(service)
+
+# test continous integration	
 
 test.droneio:
 	@./GoTest.sh ${DRONE_COMMIT_SHA}
 	@git-test commit ${CIRCLE_SHA1}
 
 test.circleci:
-	@./GoTest.sh ${CIRCLE_SHA1}
-	@git-test commit ${CIRCLE_SHA1}
-
-test.circleold:
-	@if [ "${CIRCLECI_RETRY}" = "" ]; then \
-		echo "test CIRCLE_SHA1"; \
-		./GoTest.sh ${CIRCLE_SHA1}; \
-	else \
-		echo "test CIRCLECI_RETRY_SHA1"; \
-		./GoTest.sh ${CIRCLECI_RETRY_SHA1}; \
-	fi	
+	@.circleci/circleci.sh
 
 # go build & run
 
+go.ensure.run:
+	make go.dep.ensure
+	make go.run.service
+
 go.build.service:
-	@go build -o $(name) service/$(name)/*.go
+	@echo ">>> building $(service)"
+	@go build -v -o $(service) svc/$(service)/*.go
 
 go.build.tools:
 	@go build -o $(name) tools/$(name)/*.go
 
 go.run.service:
-	make go.build.service $(name)
-	@EXMPLENV=$(env) ./$(name) -log_level=debug -config_dir=service/$(name)/files/config
+	make go.build.service $(service)
+	@echo ">>> running $(service) with env $(env)"
+	@TKPENV=$(env) ./$(service) -log_level=debug -config_dir=svc/$(service)/files/config
 
+go.clean.bin:
+	- rm bookapp
+	- rm rentapp
+	- rm ongkirapp
+	- rm togel
+
+go.dep.init:
+	@echo ">>> dep init $(service)"
+	@cd svc/$(service) && dep init -v
+
+go.dep.ensure:
+	@echo ">>> dep ensure $(service)"
+	@cd svc/$(service) && dep ensure -v --vendor-only
+
+go.dep.update:
+	@echo ">>> dep update $(service)"
+	@cd svc/$(service) && dep ensure -v -update
+
+# tools
+
+tools.update:
+	@echo ">>> updating git-test"
+	@go install -v github.com/lab46/monorepo/tools/git-test
+	@echo ">>> updating sqlimporter"
+	@go install -v github.com/lab46/monorepo/tools/sqlimporter
+	@echo ">>> tools update complete"
 
 ## docker specific
 
@@ -63,70 +104,22 @@ go.run.service:
 define docker.go.build
 	-docker image rm -f $(1)
 	@echo ">>> compiling $(2)"
-	@cd files && GOOS=linux go build -o $(2) ../$(2)/*.go
+	@cd svc/$(2) && GOOS=linux go build -o $(2)
 	@echo ">>> docker build"
-	@cd files && docker build . -f Dockerfile.$(2) -t $(1)
+	@cd svc/$(2) && docker build --build-arg service=$(2) . -t $(1)
 	@echo ">>> removing $(2) binary"
-	@cd files && rm $(2)
+	@cd svc/$(2) && rm $(2)
 endef
 
-## bookapp
-
-docker.build.bookapp:
-	$(eval dockerimage = "bookapp:v0.10")
-	$(eval appname = "bookapp")
-	$(call docker.go.build,$(dockerimage),$(appname))
-
-# /envoy/envoy_linux -c /envoy/envoy_config.json
-docker.run.bookapp:
-	$(eval dockerimage = "bookapp:v0.10")
-	$(eval appname = "bookapp")
-	@docker run --name $(appname) -d $(dockerimage) tail -f /dev/null
+docker.build:
+	$(eval dockerimage = "$(service):v0.10")
+	$(call docker.go.build,$(dockerimage),$(service))
 
 
-docker.stop.bookapp:
-	-docker stop bookapp
-	-docker rm -f bookapp
+docker.run:
+	$(eval dockerimage = "$(service):v0.10")
+	@docker run --name $(service) -d $(dockerimage)
 
-## rentapp
-
-docker.build.rentapp:
-	$(eval dockerimage = "rentapp:v0.10")
-	$(eval appname = "rentapp")
-	$(call docker.go.build,$(dockerimage),$(appname))
-
-docker.run.rentapp:
-	$(eval dockerimage = "rentapp:v0.10")
-	$(eval appname = "rentapp")
-	@docker run --name $(appname) -d $(dockerimage)
-
-docker.stop.rentapp:
-	-docker stop rentapp
-
-## need a better solution for run and stop all
-
-docker.compose-test.up:
-	@cd files && GOOS=linux go build -v -o bookapp ../bookapp/*.go
-	@cd files && GOOS=linux go build -v -o rentapp ../rentapp/*.go
-	@docker-compose -f Docker-compose.test.yaml up -d
-	@cd files && rm bookapp
-	@cd files && rm rentapp
-
-docker.compose-test.down:
-	@docker-compose -f Docker-compose.test.yaml down
-
-docker.build.all:
-	make docker.build.bookapp
-	make docker.build.rentapp
-
-docker.run.all:
-	-docker network create localnet
-	@docker run --name bookapp -d --net localnet bookapp:v0.10
-	@docker run --name rentapp -d --net localnet rentapp:v0.10
-
-docker.stop.all:
-	-docker stop bookapp
-	-docker rm -f bookapp
-	-docker stop rentapp
-	-docker rm -f rentapp
-	-docker network rm localnet	
+docker.stop:
+	-docker stop $(service)
+	-docker rm -f $(service)

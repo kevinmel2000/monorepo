@@ -8,19 +8,15 @@ This works is inspired By Hendra Huang database integration test: https://github
 
 To test integration with database. When we have a function that interract with database, the schema is imported and can be dropped afterwards.
 
-## Sql file for SQLImporter
-
-To differentiate each queries in sql files, `--end` need to be added.
+## Sql file example
 
 ```sql
 CREATE TABLE IF NOT EXISTS `something1` (
     `something1_id` bigint(20) NOT NULL
 )
---end
 
 CREATE TABLE IF NOT EXISTS `something2` (
     `something2_id` bigint(20) NOT NULL,
     `field1` varchar(10) NOT NULL
 )
---end
 ```

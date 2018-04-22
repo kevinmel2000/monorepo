@@ -1,0 +1,28 @@
+build:
+  lang: go
+  ports:
+    http: 8008
+    grpc: 9876
+  service_communication:
+    http:
+      - name: ongkirapp
+        timeout_ms: "800"
+      - name: kero-addr
+        timeout_ms: 700
+    grpc:
+      - name: ongkirapp
+        listener_port : 8005
+        timeout_ms: 1000
+    external:
+      - name: jne
+        hosts: 
+          - tcp://1.1.1.01:80
+          - tcp://1.1.1.02:80
+        timeout_ms: 1000
+        port: 10311
+        overide_host: https://host.jne.com
+    redis:
+      - name: redis-kero
+        hosts:
+          - 172.123.345.567:6379
+          - 172.123.345.568:6379

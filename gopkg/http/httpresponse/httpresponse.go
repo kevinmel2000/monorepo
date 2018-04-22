@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/lab46/example/gopkg/log"
+	"github.com/lab46/monorepo/gopkg/log"
 )
 
 var (
@@ -18,6 +18,7 @@ func init() {
 	internalServerErrorResp, _ = json.Marshal(internalServerErr)
 }
 
+// StatusOK response
 func StatusOK(w http.ResponseWriter) {
 	resp := map[string]interface{}{
 		"status": "OK",
@@ -27,6 +28,7 @@ func StatusOK(w http.ResponseWriter) {
 	w.Write(jsonResp)
 }
 
+// InternalServerError response
 func InternalServerError(w http.ResponseWriter, errString ...string) {
 	status := http.StatusInternalServerError
 	resp := map[string]interface{}{
@@ -41,6 +43,7 @@ func InternalServerError(w http.ResponseWriter, errString ...string) {
 	w.Write([]byte(jsonResp))
 }
 
+// BadRequest response
 func BadRequest(w http.ResponseWriter, errString ...string) {
 	status := http.StatusBadRequest
 	resp := map[string]interface{}{
@@ -56,6 +59,7 @@ func BadRequest(w http.ResponseWriter, errString ...string) {
 	w.Write([]byte(jsonResp))
 }
 
+// WithData response
 func WithData(w http.ResponseWriter, data interface{}) {
 	status := http.StatusOK
 	resp := map[string]interface{}{
@@ -71,6 +75,7 @@ func WithData(w http.ResponseWriter, data interface{}) {
 	w.Write([]byte(jsonResp))
 }
 
+// WithObject response
 func WithObject(w http.ResponseWriter, object interface{}) {
 	status := http.StatusOK
 	jsonResp, err := json.Marshal(object)

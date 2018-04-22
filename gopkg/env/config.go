@@ -7,7 +7,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/lab46/example/gopkg/log"
+	"github.com/lab46/monorepo/gopkg/log"
+	gcfg "gopkg.in/gcfg.v1"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -52,4 +53,11 @@ func LoadYamlConfig(result interface{}, filename string) error {
 		return err
 	}
 	return yaml.Unmarshal(content, result)
+}
+
+// LoadIniConfig to load ini file format for config
+func LoadIniConfig(result interface{}, filename string) error {
+	configDir := path.Join(cfg.Dir, filename)
+	err := gcfg.ReadFileInto(result, configDir)
+	return err
 }

@@ -24,7 +24,7 @@ func getFileList(dir string) ([]string, error) {
 }
 
 // this required to split the string
-var delimiter = "--end"
+var delimiter = ";"
 
 // parseFile will parse the entire .sql file to queries
 func parseFiles(filepath string) ([]string, error) {

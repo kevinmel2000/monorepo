@@ -1,0 +1,25 @@
+version: '3'
+services:
+  svc1:
+    build:
+      context: ./svc1
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "9090:80"
+  svc2-1:
+    build:
+      context: ./svc2
+      dockerfile: Dockerfile
+    environment:
+      - SVCENV=svc2-1
+    ports:
+      - "9091:80"
+  svc2-2:
+    build:
+      context: ./svc2
+      dockerfile: Dockerfile
+    environment:
+      - SVCENV=svc2-2
+    ports:
+      - "9092:80"

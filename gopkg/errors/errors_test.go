@@ -7,7 +7,6 @@ import (
 )
 
 func TestErrs(t *testing.T) {
-	t.Parallel()
 	cases := []struct {
 		err    *Errs
 		expect *Errs
@@ -29,7 +28,7 @@ func TestErrs(t *testing.T) {
 
 	for _, val := range cases {
 		if !reflect.DeepEqual(val.err, val.expect) {
-			t.Errorf("Expect %+v but got %+v", val.err, val.expect)
+			t.Errorf("Expect %+v but got %+v", *val.err, *val.expect)
 		}
 	}
 }
@@ -46,8 +45,39 @@ func TestMessages(t *testing.T) {
 	}
 }
 
+func TestGetFields(t *testing.T) {
+	fields := Fields{
+		"key1": "value1",
+		"key2": "value2",
+	}
+	fieldsLength := len(fields)
+
+	err := New("Errors", fields)
+	fs := err.GetFields()
+	fsLength := len(fs)
+
+	if fieldsLength != fsLength {
+		t.Error("fields length is different")
+		return
+	}
+
+	for key := range fs {
+		if fields[key] != fs[key] {
+			t.Error("value is incorrect")
+		}
+	}
+}
+
+func TestGetFileAndLine(t *testing.T) {
+	SetRuntimeOutput(true)
+	err := New("some error")
+	f, l := err.GetFileAndLine()
+	if f == "" || l == 0 {
+		t.Error("wrong file or line")
+	}
+}
+
 func TestMatch(t *testing.T) {
-	t.Parallel()
 	cases := []struct {
 		err1        error
 		err2        error

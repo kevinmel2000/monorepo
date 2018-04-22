@@ -22,6 +22,5 @@ func (r Redis) RPushEx(key string, values []string, expiry int) (int, error) {
 	if err != nil {
 		return length, err
 	}
-
-	return r.Expire(key, expiry)
+	return 0, nil
 }

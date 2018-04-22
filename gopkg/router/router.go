@@ -5,14 +5,16 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/lab46/example/gopkg/log"
+	traceLog "github.com/opentracing/opentracing-go/log"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/lab46/monorepo/gopkg/http/httputil"
+	"github.com/lab46/monorepo/gopkg/log"
+	"github.com/lab46/monorepo/gopkg/tracing"
 )
-
-//Example of router package, the router wrapper is based on gorilla/mux
 
 // Router of vehicle-insurance
 type Router struct {
@@ -20,9 +22,31 @@ type Router struct {
 	r   *mux.Router
 }
 
+// TimeoutOptions struct
+type TimeoutOptions struct {
+	Duration time.Duration
+	Response interface{}
+}
+
+// RecoverOptions struct
+type RecoverOptions struct {
+}
+
+var defaultTimeoutResponse []byte
+
 // Options for router
 type Options struct {
-	Timeout time.Duration
+	Timeout TimeoutOptions
+}
+
+var once sync.Once
+
+func init() {
+	once.Do(func() {
+		defaultTimeoutResponse, _ = json.Marshal(map[string]interface{}{
+			"errors": []string{"request timed out"},
+		})
+	})
 }
 
 // New router
@@ -50,15 +74,23 @@ func (rtr Router) SubRouter(pathPrefix string) *Router {
 	}
 }
 
-// timeout middleware
+// handle middleware
 // the timeout middleware should cover timeout budget
-func (rtr *Router) timeout(h http.HandlerFunc) http.HandlerFunc {
+func (rtr *Router) handle(h http.HandlerFunc, traceOperation ...string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		opt := rtr.opt
 		// cancel context
-		if opt.Timeout > 0 {
-			ctx, cancel := context.WithTimeout(r.Context(), opt.Timeout*time.Second)
+		if opt.Timeout.Duration > 0 {
+			ctx, cancel := context.WithTimeout(r.Context(), opt.Timeout.Duration*time.Second)
 			defer cancel()
+			r = r.WithContext(ctx)
+		}
+
+		// trace the request
+		if len(traceOperation) > 0 {
+			span, ctx := tracing.StartSpanFromHTTPRequest(r, traceOperation[0])
+			defer span.Finish()
+			span.LogFields(traceLog.String("IP", httputil.GetClientIPAddress(r)))
 			r = r.WithContext(ctx)
 		}
 
@@ -69,13 +101,12 @@ func (rtr *Router) timeout(h http.HandlerFunc) http.HandlerFunc {
 		}()
 		select {
 		case <-r.Context().Done():
-			// only an example response
-			resp := map[string]interface{}{
-				"errors": []string{"Request timed out"},
+			jsonResp, err := json.Marshal(rtr.opt.Timeout.Response)
+			if err != nil {
+				log.Errorf("[router][timeout] failed to marshal response for timeout. Err: %s", err.Error())
+				jsonResp = defaultTimeoutResponse
 			}
-			jsonResp, _ := json.Marshal(resp)
 			w.WriteHeader(http.StatusRequestTimeout)
-			// only an example response
 			w.Write(jsonResp)
 			return
 		case <-doneChan:
@@ -84,65 +115,39 @@ func (rtr *Router) timeout(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// responseWriterDelegator to delegate the current writer
-// this is a 100% from prometheus delegator with some modification
-// the modification is needed because namespace is required
-type responseWriterDelegator struct {
-	http.ResponseWriter
-	// handler, method string
-	status      int
-	written     int64
-	wroteHeader bool
-}
-
-func (r *responseWriterDelegator) WriteHeader(code int) {
-	r.status = code
-	r.wroteHeader = true
-	r.ResponseWriter.WriteHeader(code)
-}
-
-func (r *responseWriterDelegator) Write(b []byte) (int, error) {
-	if !r.wroteHeader {
-		r.WriteHeader(http.StatusOK)
-	}
-	n, err := r.ResponseWriter.Write(b)
-	r.written += int64(n)
-	return n, err
-}
-
 func sanitizeStatusCode(status int) string {
 	code := strconv.Itoa(status)
 	return code
 }
 
 // Get function
-func (rtr Router) Get(pattern string, h http.HandlerFunc) {
+func (rtr Router) Get(pattern string, h http.HandlerFunc, traceOperation ...string) {
 	log.Debugf("[router][get] %s", pattern)
-	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("GET")
+	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.handle(h, traceOperation...))).Methods("GET")
 }
 
 // Post function
-func (rtr Router) Post(pattern string, h http.HandlerFunc) {
+func (rtr Router) Post(pattern string, h http.HandlerFunc, traceOperation ...string) {
 	log.Debugf("[router][post] %s", pattern)
-	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("POST")
+	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.handle(h, traceOperation...))).Methods("POST")
 }
 
 // Put function
-func (rtr Router) Put(pattern string, h http.HandlerFunc) {
+func (rtr Router) Put(pattern string, h http.HandlerFunc, traceOperation ...string) {
 	log.Debugf("[router][put] %s", pattern)
-	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("PUT")
+	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.handle(h, traceOperation...))).Methods("PUT")
 }
 
 // Delete function
-func (rtr Router) Delete(pattern string, h http.HandlerFunc) {
+func (rtr Router) Delete(pattern string, h http.HandlerFunc, traceOperation ...string) {
 	log.Debugf("[router][delete] %s", pattern)
-	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("DELETE")
+	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.handle(h, traceOperation...))).Methods("DELETE")
 }
 
 // Patch function
-func (rtr Router) Patch(pattern string, h http.HandlerFunc) {
+func (rtr Router) Patch(pattern string, h http.HandlerFunc, traceOperation ...string) {
 	log.Debugf("[router][patch] %s", pattern)
-	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.timeout(h))).Methods("PATCH")
+	rtr.r.HandleFunc(pattern, prometheus.InstrumentHandlerFunc(pattern, rtr.handle(h, traceOperation...))).Methods("PATCH")
 }
 
 // Handle function

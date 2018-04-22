@@ -8,8 +8,9 @@ import (
 	"net/url"
 )
 
-func ParseURL(rawUrl string, keyVal ...string) (string, error) {
-	u, err := url.Parse(rawUrl)
+// ParseURL return parsed url
+func ParseURL(rawURL string, keyVal ...string) (string, error) {
+	u, err := url.Parse(rawURL)
 	if err != nil {
 		return "", err
 	}
@@ -27,6 +28,7 @@ func ParseURL(rawUrl string, keyVal ...string) (string, error) {
 	return finalURL, nil
 }
 
+// NewRequestWithHostHeader will add host header to your request
 func NewRequestWithHostHeader(method, urlStr, hostHeader string, body io.Reader) (*http.Request, error) {
 	req, err := http.NewRequest(method, urlStr, body)
 	if err != nil {

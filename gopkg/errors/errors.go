@@ -9,6 +9,7 @@ import (
 	"log"
 )
 
+//some changes
 var runtimeOutput bool
 
 // SetRuntimeOutput will provide error information where the error is happened
@@ -16,13 +17,15 @@ func SetRuntimeOutput(b bool) {
 	runtimeOutput = b
 }
 
-// IsRuntimeEnabled to check the status of runtimeOutput
+// IsRuntimeOuputEnabled to check the status of runtimeOutput
 func IsRuntimeOuputEnabled() bool {
 	return runtimeOutput
 }
 
+// Fields of error
 type Fields map[string]interface{}
 
+// ToArrayInterface fields
 func (f Fields) ToArrayInterface() []interface{} {
 	fieldsLength := len(f)
 	if fieldsLength == 0 {
@@ -97,15 +100,16 @@ func New(args ...interface{}) *Errs {
 		// []string is detected as Errs.Messages
 		// Messages can be appended, but might need to create a different type in the future
 		case []string:
+			msgs := arg.([]string)
 			if err.messages == nil {
 				err.messages = make([]string, 0)
 			}
-			msgs := arg.([]string)
 			err.messages = append(err.messages, msgs...)
 		default:
 			// the default error is unknown
 			_, file, line, _ := runtime.Caller(1)
 			log.Printf("errors.Errs: bad call from %s:%d: %v", file, line, args)
+			isBad = true
 		}
 	}
 	// if er have value then set errrors.error to er
@@ -164,7 +168,7 @@ Match will match two strings error through a fuzzy matching
 Need some improvement in fuzzy matching, not all cases is covered
 */
 
-// Match error
+// Match errorr
 func Match(errs1, errs2 error) bool {
 	if errs1 == nil && errs2 == nil {
 		return true

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/lab46/example/gopkg/print"
+	"github.com/lab46/monorepo/gopkg/print"
 )
 
 var execPrint *print.Printer

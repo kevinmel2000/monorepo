@@ -1,40 +1,72 @@
 package repo
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 
-	"github.com/lab46/example/gopkg/exec"
-	"github.com/lab46/example/gopkg/print"
+	"github.com/lab46/monorepo/gopkg/exec"
+	"github.com/lab46/monorepo/gopkg/print"
+	"github.com/lab46/monorepo/tools/git-test/projectenv"
 )
 
 var (
-	baseDir = "lab46/example"
-
-	serviceDir = "exservice"
-	services   []string
+	config struct {
+		RepoName      string
+		RepoDir       string
+		ServiceFolder string
+		Gopath        string
+	}
+	services []string
 )
+
+func init() {
+	config.RepoName = projectenv.Config.RepoName
+	config.ServiceFolder = projectenv.Config.ServiceFolder
+	config.RepoDir = projectenv.Config.RepoDir
+	config.Gopath = os.Getenv("GOPATH")
+}
 
 // GetRepoDir return repository directory of the project
 func GetRepoDir() (string, error) {
+	if config.RepoName == "" {
+		return "", errors.New("repository name cannot be empty")
+	}
+
+	// return config.RepoDir, nil
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
-	indexBase := strings.Index(currentDir, baseDir)
+	indexBase := strings.Index(currentDir, config.RepoName)
 	if indexBase == -1 {
-		return "", fmt.Errorf("not in any %s repository path", baseDir)
+		return "", fmt.Errorf("not in any %s repository path", config.RepoName)
 	}
-	repoDir := currentDir[:indexBase] + baseDir
-	return repoDir, nil
+	return fmt.Sprintf("%s%s", currentDir[:indexBase], config.RepoName), nil
 }
 
-// IsServiceDir check if servicedir is exists within a directory
+// --- service related
+
+// ServiceFolder return current service folder
+func ServiceFolder() string {
+	return config.ServiceFolder
+}
+
+// GetServiceDir return service directory
+func GetServiceDir() (string, error) {
+	repoDir, err := GetRepoDir()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(repoDir, config.ServiceFolder), nil
+}
+
+// IsServiceDir check if ServiceFolder is exists within a directory
 func IsServiceDir(directory string) bool {
-	return strings.Contains(directory, serviceDir)
+	return strings.Contains(directory, config.ServiceFolder)
 }
 
 // ServiceList return list of service
@@ -46,9 +78,9 @@ func ServiceList() ([]string, error) {
 	}
 
 	if repoDir != "" {
-		currentServiceDir = path.Join(repoDir, serviceDir)
+		currentServiceDir = path.Join(repoDir, config.ServiceFolder)
 	} else {
-		currentServiceDir = serviceDir
+		currentServiceDir = config.ServiceFolder
 	}
 
 	var services []string
@@ -65,6 +97,8 @@ func ServiceList() ([]string, error) {
 	return services, nil
 }
 
+// --- service related end
+
 // GoList return all package list via 'go list ../...' command
 func GoList() ([]string, error) {
 	cmd := exec.Command("go", "list", "../...")
@@ -73,7 +107,6 @@ func GoList() ([]string, error) {
 		return nil, err
 	}
 	trimmedOutput := strings.Trim(string(output), " \n")
-
 	pkgList := strings.Split(trimmedOutput, "\n")
 	return pkgList, nil
 }
@@ -99,7 +132,7 @@ type Dir struct {
 // TODO: need to optimize this function
 func FilterDir(dirs []string) (map[string]Dir, error) {
 	var (
-		serviceDirLength = len(serviceDir)
+		serviceDirLength = len(config.ServiceFolder)
 
 		// every changed dir must be a unique dir
 		// so map is used instead of array
@@ -108,7 +141,7 @@ func FilterDir(dirs []string) (map[string]Dir, error) {
 
 	for _, file := range dirs {
 		// skip if not in exservice path for now
-		if !strings.Contains(file, serviceDir) {
+		if !strings.Contains(file, config.ServiceFolder) || strings.Contains(file, "experiment") {
 			continue
 		}
 
@@ -133,18 +166,18 @@ func FilterDir(dirs []string) (map[string]Dir, error) {
 
 		// looking for service directory
 		// TODO: separate this to another function
-		indexService := strings.Index(f, fmt.Sprintf("%s", serviceDir))
+		indexService := strings.Index(f, fmt.Sprintf("%s", config.ServiceFolder))
 		if indexService != -1 {
-			// splitIndex is index of 'serviceDir' found + the length of 'serviceDir' itself
+			// splitIndex is index of 'ServiceFolder' found + the length of 'ServiceFolder' itself
 			// the characters after all of that is usually a '/', so we need to +1 the index
 			splitIndex := indexService + serviceDirLength
 			p := f[:indexService]
 
-			// ex: exservice/ will be splited to '['/', ''] and exservice/bookapp/book to ['/', 'bookapp/', 'book']
+			// ex: svc/ will be splited to '['/', ''] and svc/bookapp/book to ['/', 'bookapp/', 'book']
 			s := strings.SplitAfter(f[splitIndex:], "/")
 			if len(s) >= 2 {
 				if s[1] != "" {
-					serviceName := path.Join(p, serviceDir, strings.TrimSuffix(s[1], "/"), "")
+					serviceName := path.Join(p, config.ServiceFolder, strings.TrimSuffix(s[1], "/"), "")
 					dir := Dir{
 						Name: serviceName,
 						Type: ServiceType,

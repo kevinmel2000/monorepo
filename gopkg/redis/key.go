@@ -35,3 +35,15 @@ func (r Redis) Sort(key string, alpha bool, asc bool) ([]string, error) {
 
 	return redigo.Strings(conn.Do("SORT", args...))
 }
+
+// Delete function
+func (r Redis) Delete(key ...string) (int, error) {
+	conn := r.Pool.Get()
+	defer conn.Close()
+	// copy string to array of interface
+	intf := make([]interface{}, len(key))
+	for index, k := range key {
+		intf[index] = k
+	}
+	return redigo.Int(conn.Do("DEL", intf...))
+}

@@ -3,7 +3,7 @@ package env_test
 import (
 	"testing"
 
-	"github.com/lab46/example/gopkg/env"
+	"github.com/lab46/monorepo/gopkg/env"
 )
 
 func TestSetAndGetConfigDir(t *testing.T) {

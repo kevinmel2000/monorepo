@@ -7,18 +7,30 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/lab46/example/gopkg/env"
-	"github.com/lab46/example/gopkg/log"
-	"github.com/lab46/example/gopkg/router"
+	"github.com/lab46/monorepo/gopkg/env"
+	"github.com/lab46/monorepo/gopkg/log"
+	"github.com/lab46/monorepo/gopkg/router"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// Router interface
+type Router interface {
+	ServeHTTP(http.ResponseWriter, http.Request)
+	Get(string, http.HandlerFunc)
+	Post(string, http.HandlerFunc)
+	Put(string, http.HandlerFunc)
+	Delete(string, http.HandlerFunc)
+}
+
+// Options struct
 type Options struct {
 	Address string
 	Timeout time.Duration
 }
 
+// WebServer struct
 type WebServer struct {
+	r      Router
 	router *router.Router
 	port   string
 	birth  time.Time
@@ -42,11 +54,12 @@ func checkOptions(opt *Options) {
 	}
 }
 
+// New webserver
 func New(opt Options) *WebServer {
 	checkOptions(&opt)
 	address := opt.Address
 
-	r := router.New(router.Options{Timeout: opt.Timeout})
+	r := router.New(router.Options{Timeout: router.TimeoutOptions{Duration: time.Second * 2}})
 	// provide metrics endpoint for prometheus metrics
 	r.Handle("/metrics", prometheus.Handler())
 	// provide service healthcheck
@@ -82,10 +95,12 @@ func New(opt Options) *WebServer {
 	return &web
 }
 
+// Router return router from webserver
 func (w *WebServer) Router() *router.Router {
 	return w.router
 }
 
+// Run go webserver
 func (w *WebServer) Run() error {
 	log.Infof("Webserver serving on: %s", w.port)
 	return http.ListenAndServe(w.port, w.router)

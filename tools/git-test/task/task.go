@@ -7,19 +7,23 @@ import (
 	"path"
 	"strings"
 
-	"github.com/lab46/example/gopkg/print"
+	"github.com/lab46/monorepo/tools/git-test/projectenv"
 
-	"github.com/lab46/example/gopkg/env"
-	"github.com/lab46/example/gopkg/exec"
+	"github.com/lab46/monorepo/gopkg/env"
+	"github.com/lab46/monorepo/gopkg/exec"
+	"github.com/lab46/monorepo/gopkg/print"
 	"gopkg.in/yaml.v2"
 )
 
 // TaskFile is a task file name
 const TaskFile = "task.yaml"
 
+// GitTestEnv is env var for git-test
+const GitTestEnv = "GIT_TEST_ENV"
+
 // Tasks struct
 type Tasks struct {
-	T []Task `yaml:"tasks"`
+	T []Task `yaml:"test"`
 }
 
 // Task struct
@@ -29,7 +33,7 @@ type Task struct {
 	Env  []string `yaml:"env"`
 }
 
-// ParseTask return task defined in yml file
+// ReadTasksFromFile return task defined in yml file
 func ReadTasksFromFile(filename string) (Tasks, error) {
 	t := Tasks{}
 	content, err := ioutil.ReadFile(filename)
@@ -51,14 +55,23 @@ func convertToEnvMap(envs []string) map[string]string {
 	return e
 }
 
+func getCurrentEnv() string {
+	e := env.Getenv(GitTestEnv)
+	if e == "" {
+		// default is dev
+		e = "dev"
+	}
+	return e
+}
+
 // DoTasks execute all tasks
 func DoTasks(t Tasks) error {
-	currentEnv := env.GetCurrentServiceEnv()
+	currentEnv := projectenv.Config.Env
 	for _, task := range t.T {
 		// check environment, skip if not included
 		if len(task.Env) > 0 {
 			envs := convertToEnvMap(task.Env)
-			if _, ok := envs[env.GetCurrentServiceEnv()]; !ok {
+			if _, ok := envs[currentEnv]; !ok {
 				print.Debug(fmt.Sprintf("skipping %s. Env: %s", task.Run, currentEnv))
 				continue
 			}

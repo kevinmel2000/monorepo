@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"time"
 
@@ -81,7 +82,11 @@ func selectDB(db *sqlx.DB, dbName string) error {
 }
 
 // ImportSchemaFromFiles to import all *.sql file from directory
-func ImportSchemaFromFiles(db *sqlx.DB, filepath string) error {
+func ImportSchemaFromFiles(ctx context.Context, db *sqlx.DB, filepath string) error {
+	if filepath == "." {
+		filepath, _ = os.Getwd()
+	}
+
 	files, err := getFileList(filepath)
 	if err != nil {
 		return err
@@ -98,7 +103,7 @@ func ImportSchemaFromFiles(db *sqlx.DB, filepath string) error {
 			return nil
 		}
 
-		tx, err := db.BeginTx(context.TODO(), nil)
+		tx, err := db.BeginTx(ctx, nil)
 		if err != nil {
 			return err
 		}
@@ -106,7 +111,7 @@ func ImportSchemaFromFiles(db *sqlx.DB, filepath string) error {
 		var query string
 		for key := range sqlContents {
 			query = sqlContents[key]
-			_, err = tx.ExecContext(context.TODO(), query)
+			_, err = tx.ExecContext(ctx, query)
 			if err != nil {
 				break
 			}

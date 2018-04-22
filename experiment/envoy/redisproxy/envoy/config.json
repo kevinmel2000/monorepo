@@ -1,0 +1,74 @@
+{
+    "listeners": [
+      {
+        "address": "tcp://0.0.0.0:80",
+        "filters": [
+          {
+            "type": "read",
+            "name": "http_connection_manager",
+            "config": {
+              "codec_type": "auto",
+              "stat_prefix": "ingress_http",
+              "route_config": {
+                "virtual_hosts": [
+                  {
+                    "name": "local_service",
+                    "domains": ["*"],
+                    "routes": [
+                      {
+                        "timeout_ms": 0,
+                        "prefix": "/",
+                        "cluster": "local_service"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "filters": [
+                  {   "name": "health_check",
+                      "config": {
+                          "pass_through_mode": true, "cache_time_ms": 2500, "endpoint": "/healthcheck"
+                      }
+                  },
+                  {"name": "router","config": {}}
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "address": "tcp://0.0.0.0:6379",
+        "filters": [
+            {
+                "name": "redis_proxy",
+                "config": {
+                    "cluster_name": ""
+                }
+            }
+        ]  
+      }
+    ],
+    "admin": {
+      "access_log_path": "/dev/null",
+      "address": "tcp://0.0.0.0:8001"
+    },
+    "statsd_udp_ip_address": "0.0.0.0:9125",
+    "cluster_manager": {
+      "clusters": [
+        {
+            "name": "promo_redis_cluster",
+            "connect_timeout_ms": 800,
+            "type": "static",
+            "lb_type": "ring_hash",
+            "hosts": [{"url": "tcp://redis:6379"},{"url": "tcp://redis2:6379"}]
+        },
+        {
+          "name": "local_service",
+          "connect_timeout_ms": 800,
+          "type": "static",
+          "lb_type": "round_robin",
+          "hosts": [{"url": "tcp://0.0.0.0:9000"}]
+        }
+      ]
+    }
+  } 

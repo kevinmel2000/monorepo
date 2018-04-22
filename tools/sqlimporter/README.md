@@ -1,13 +1,13 @@
 # SQLImporter CLI
 
-SQLImporter command line tools used to import schema from *.sql files in a directory with a special rules in *.sql file. For reference: [sqlimporter library](https://github.com/lab46/example/blob/master/pkg/testutil/sqlimporter/README.md)
+SQLImporter command line tools used to import schema from *.sql files in a directory. For reference: [sqlimporter library](https://github.com/lab46/monorepo/blob/master/gopkg/testutil/sqlimporter/README.md)
 
 This tools might useful if your environment don't have any postgresql/mysql command installed but have your database running in a container.
 
 ## How to use it 
 
 1. Install `go`.
-2. `go install github.com/lab46/example/tools/sqlimporter/...`
+2. `go install github.com/lab46/monorepo/tools/sqlimporter/...`
 3. Now you can type `sqlimporter` to get some help.
 ```shell
 sqlimporter command line tools
@@ -29,8 +29,4 @@ Use "sqlimporter [command] --help" for more information about a command.
 
 To import a schema into a database:
 
-`sqlimporter import [driver] [dbname] [dsn] [directory]`
-
-or for example:
-
-`sqlimporter import book postgres "postgres://exampleapp:exampleapp@localhost:5432?sslmode=disable" "files/dbschema/book/"`
+`sqlimporter import postgres --db book --host localhost --port 5432 -u logistic:logistic -f 'files/dbschema/book/'`

@@ -3,11 +3,11 @@ package env_test
 import (
 	"testing"
 
-	"github.com/lab46/example/gopkg/env"
+	"github.com/lab46/monorepo/gopkg/env"
 )
 
 func TestSetFromEnvFile(t *testing.T) {
-	err := env.SetFromEnvFile("../../files/.env")
+	err := env.SetFromEnvFile("../../files/testfile/env/.env")
 	if err != nil {
 		t.Error(err)
 	}
@@ -27,16 +27,16 @@ func TestSetFromEnvFile(t *testing.T) {
 
 func TestGetCurrentServieEnv(t *testing.T) {
 	e := env.GetCurrentServiceEnv()
-	if e != "dev" {
+	if e != string(env.DevelopmentEnv) {
 		t.Errorf("Current env should be development. Current env: %s", e)
 	}
 
-	err := env.Setenv("EXMPLENV", "prod")
+	err := env.Setenv(env.GetEnvName(), string(env.ProductionEnv))
 	if err != nil {
 		t.Error(err)
 	}
 	e = env.GetCurrentServiceEnv()
-	if e != "prod" {
+	if e != string(env.ProductionEnv) {
 		t.Errorf("Current env should changed to prod. Current env: %s", e)
 	}
 }

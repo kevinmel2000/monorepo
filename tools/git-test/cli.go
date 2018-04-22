@@ -2,17 +2,21 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"time"
 
-	"github.com/lab46/example/gopkg/exec"
-	"github.com/lab46/example/gopkg/print"
-	"github.com/lab46/example/tools/git-test/repo"
-	"github.com/lab46/example/tools/git-test/runner"
 	"github.com/spf13/cobra"
+	"github.com/lab46/monorepo/gopkg/exec"
+	"github.com/lab46/monorepo/gopkg/print"
+	"github.com/lab46/monorepo/tools/git-test/git"
+	"github.com/lab46/monorepo/tools/git-test/projectenv"
+	"github.com/lab46/monorepo/tools/git-test/repo"
+	"github.com/lab46/monorepo/tools/git-test/runner"
 )
 
 var (
-	// global variable from global flags
+	// VerboseFlag for debugging
 	VerboseFlag bool
 	timeStart   time.Time
 )
@@ -42,7 +46,7 @@ func initCMD() *cobra.Command {
 		Use:   "git-test [command]",
 		Short: "git-test command line tools",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			// checkDependencies()
+			checkDependencies()
 			print.SetDebug(VerboseFlag)
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
@@ -63,10 +67,10 @@ func registerGitTestCommand(root *cobra.Command) {
 			Short: "diff will detect diff before commit and test the changes",
 			Args:  cobra.MaximumNArgs(1),
 			Run: func(c *cobra.Command, args []string) {
-				list, err := gitDiffList()
+				print.Error(changeToRepodir())
+				list, err := git.DiffList()
 				print.Error(err)
-				err = processDirs(list)
-				print.Error(err)
+				print.Error(processDirs(list))
 			},
 		},
 		{
@@ -74,22 +78,60 @@ func registerGitTestCommand(root *cobra.Command) {
 			Short: "commit will detect changes in a commit and test it",
 			Args:  cobra.MinimumNArgs(1),
 			Run: func(c *cobra.Command, args []string) {
+				print.Error(changeToRepodir())
 				sha1 := args[0]
-				list, err := gitSHAList(sha1)
+				list, err := git.SHAList(sha1)
 				print.Error(err)
-				processDirs(list)
-				print.Error(err)
+				print.Fatal(processDirs(list))
 			},
 		},
 		{
-			Use:   "test [args]",
-			Short: "test command for git-test",
+			Use:   "service [servicename ...]",
+			Short: "service will test a service in service directory",
+			Args:  cobra.MinimumNArgs(1),
 			Run: func(c *cobra.Command, args []string) {
-				print.Info("ARGS:", args)
+				serviceFolder := repo.ServiceFolder()
+				services := make([]string, len(args))
+				for key, val := range args {
+					services[key] = path.Join(serviceFolder, val)
+				}
+				print.Fatal(processDirs(services))
+			},
+		},
+		{
+			Use:   "info [args]",
+			Short: "info command for git-test",
+			Run: func(c *cobra.Command, args []string) {
+				repoName := projectenv.Config.RepoName
+				serviceDir := projectenv.Config.ServiceFolder
+				repoDir := projectenv.Config.RepoDir
+
+				print.Info("REPO_NAME:", repoName)
+				print.Info("REPO_DIR:", repoDir)
+				print.Info("SERVICE_FOLDER:", serviceDir)
 			},
 		},
 	}
 	root.AddCommand(cmds...)
+}
+
+// changeToRepodir for changedir to root repo path, and make git-test work on relative repo path
+func changeToRepodir() error {
+	// change dir into root path of repository
+	repoDir, err := repo.GetRepoDir()
+	if err != nil {
+		return err
+	}
+	return os.Chdir(repoDir)
+}
+
+func changeToServiceDir() error {
+	// change dir into service path of repository
+	serviceDir, err := repo.GetServiceDir()
+	if err != nil {
+		return err
+	}
+	return os.Chdir(serviceDir)
 }
 
 func processDirs(list []string) error {

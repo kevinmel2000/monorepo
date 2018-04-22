@@ -1,0 +1,10 @@
+masterexample:
+  dsn: postgres://logistic:logistic@postgres:5432?sslmode=disable
+  maxconns: 100
+  maxidleconns: 10
+  retry: 5
+slaveexample:
+  dsn: postgres://logistic:logistic@postgres:5432?sslmode=disable
+  maxconns: 100
+  maxidleconns: 10
+  retry: 5

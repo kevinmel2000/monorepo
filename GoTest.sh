@@ -48,7 +48,7 @@ unique_path=($(echo "${filespath[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 # get all go packages in repo
 # sometimes go list will print _/$GOPATH/src/project package instead $GOPATH/src/project/package
 # need to trim _/$GOPATH/src before go test and go build can run
-# example: echo _/Users/Valge/Go/src/github.com/lab46/example/pkg/webserver | sed 's/\_\/Users\/Valge\/Go\/src\///'
+# example: echo _/Users/SomeUser/Go/src/github.com/lab46/example/pkg/webserver | sed 's/\_\/Users\/SomeUser\/Go\/src\///'
 go_packages="$(go list ./... | grep -v exservice | grep -v /vendor/ | sed "s/\_$gopath//")"
 
 # looks for go test path

@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -38,5 +39,18 @@ func TestParseURL(t *testing.T) {
 				t.Errorf("Expect %s but url is %s", expect, u)
 			}
 		}
+	}
+}
+
+func TestNewRequestWithHostHeader(t *testing.T) {
+	host := "logistic"
+	req, err := NewRequestWithHostHeader(http.MethodPost, "local", host, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if host != req.Header.Get("Host") {
+		t.Error("host header is incorrect")
+		return
 	}
 }

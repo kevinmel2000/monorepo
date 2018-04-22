@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/lab46/example/gopkg/errors"
+	"github.com/lab46/monorepo/gopkg/errors"
 )
 
 // this package is used to produce pretty print output
@@ -70,7 +70,7 @@ func Fatal(err error) {
 		return
 	}
 	Error(err)
-	os.Exit(1)
+	os.Exit(2)
 }
 
 func print(prefix string, v ...interface{}) {

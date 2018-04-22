@@ -10,7 +10,7 @@ func TestGetRepoDir(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !strings.Contains(dir, "/lab46/example") {
+	if !strings.Contains(dir, "/lab46/monorepo") {
 		t.Errorf("Dir is not as expected: %s", dir)
 	}
 }
@@ -31,24 +31,33 @@ func TestFilterDir(t *testing.T) {
 		// this need to be fixed, files is not tracked
 		"../../../.gitignore",
 		"../../../files/",
-		"../../../exservice/",
-		"../../../exservice/bookapp",
-		"../../../exservice/bookapp/book",
-		"../../../exservice/bookapp/book/book.go",
-		"../../../exservice/bookapp/book/old",
-		"../../../exservice/bookapp/book/something.go",
-		"../../../exservice/rentapp/rent",
-		"../../../exservice/rentapp/rent/old",
-		"../../../exservice/rentapp/rent/something.go",
+		"../../../svc/",
+		"../../../svc/bookapp",
+		"../../../svc/bookapp/book",
+		"../../../svc/bookapp/book/book.go",
+		"../../../svc/bookapp/book/old",
+		"../../../svc/bookapp/book/something.go",
+		"../../../svc/rentapp/rent",
+		"../../../svc/rentapp/rent/old",
+		"../../../svc/rentapp/rent/something.go",
+		"../../../experiment/grpc",
+		"../../../experiment/grpc/svc1",
+		"../../../experiment/grpc/svc2",
 	}
 	expect := []string{
-		"../../../exservice/bookapp",
-		"../../../exservice/rentapp",
+		"../../../svc/bookapp",
+		"../../../svc/rentapp",
 	}
 
 	dirs, err := FilterDir(files)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	if len(dirs) != len(expect) {
+		t.Error("dirs and expected length mismatch")
+		return
 	}
 
 	for _, e := range expect {

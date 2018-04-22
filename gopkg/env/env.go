@@ -6,19 +6,22 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/lab46/example/gopkg/log"
+	"github.com/subosito/gotenv"
+	"github.com/lab46/monorepo/gopkg/log"
 )
 
 type ServiceEnv string
 
+// Env list
 const (
-	DevelopmentEnv ServiceEnv = "dev"
+	DevelopmentEnv ServiceEnv = "development"
 	StagingEnv     ServiceEnv = "staging"
-	ProductionEnv  ServiceEnv = "prod"
+	ProductionEnv  ServiceEnv = "production"
 )
 
+// Env related var
 var (
-	envName      = "EXMPLENV"
+	envName      = "TKPENV"
 	currentBuild = "unavailable"
 	goVersion    string
 )
@@ -26,13 +29,14 @@ var (
 // env package will read .env file when applicatino is started
 
 func init() {
-	err := SetFromEnvFile(".env")
+	err := gotenv.Load()
 	if err != nil {
 		log.Debug(err)
 	}
 	goVersion = runtime.Version()
 }
 
+// SetFromEnvFile load file
 func SetFromEnvFile(filepath string) error {
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		return err
@@ -50,6 +54,7 @@ func SetFromEnvFile(filepath string) error {
 	}
 	for scanner.Scan() {
 		text := scanner.Text()
+		text = strings.TrimSpace(text)
 		vars := strings.SplitN(text, "=", 2)
 		if len(vars) < 2 {
 			return err
@@ -61,6 +66,11 @@ func SetFromEnvFile(filepath string) error {
 	return nil
 }
 
+func GetEnvName() string {
+	return envName
+}
+
+// SetEnvName to set env variable name
 func SetEnvName(name string) {
 	envName = name
 }

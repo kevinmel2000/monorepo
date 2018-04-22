@@ -1,9 +1,10 @@
 package log
 
 import (
+	"os"
 	"strings"
 
-	"github.com/lab46/example/gopkg/errors"
+	"github.com/lab46/monorepo/gopkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -13,6 +14,7 @@ var (
 	logger       *zap.Logger
 	sugared      *zap.SugaredLogger
 	currentLevel level
+	fileOutput   string
 )
 
 type level int
@@ -26,6 +28,7 @@ const (
 	FatalLevel
 )
 
+// Log level
 const (
 	DebugLevelString = "debug"
 	InfoLevelString  = "info"
@@ -42,12 +45,11 @@ func newZapConfig() zap.Config {
 	config := zap.NewProductionConfig()
 	config.DisableCaller = true
 	config.DisableStacktrace = true
+	config.ErrorOutputPaths = []string{"stderr"}
 	return config
 }
 
-// SetLevel will set level to logger and create a new logger based on level
-func SetLevel(l level) {
-	config := newZapConfig()
+func setLevel(config *zap.Config, l level) {
 	switch l {
 	case DebugLevel:
 		config.Level.SetLevel(zap.DebugLevel)
@@ -62,10 +64,47 @@ func SetLevel(l level) {
 	default:
 		config.Level.SetLevel(zap.InfoLevel)
 	}
-	logger, _ = config.Build()
-	defer logger.Sync()
+}
+
+func setLogger(log *zap.Logger) {
+	logger = log
+	logger.Sync()
 	sugared = logger.Sugar()
-	defer sugared.Sync()
+	sugared.Sync()
+}
+
+// SetOutputToFile function
+func SetOutputToFile(filename string) error {
+	// attempted to create log file, if not created then the logger will return error
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		if _, err = os.Create(filename); err != nil {
+			return err
+		}
+	}
+	config := newZapConfig()
+	config.OutputPaths = []string{"stdout", filename}
+	setLevel(&config, currentLevel)
+	fileLogger, err := config.Build()
+	if err != nil {
+		return err
+	}
+	setLogger(fileLogger)
+	fileOutput = filename
+	return nil
+}
+
+// SetLevel will set level to logger and create a new logger based on level
+func SetLevel(l level) {
+	// set output to file if write to file exists
+	if fileOutput != "" {
+		currentLevel = l
+		SetOutputToFile(fileOutput)
+		return
+	}
+	config := newZapConfig()
+	setLevel(&config, l)
+	logger, _ := config.Build()
+	setLogger(logger)
 	currentLevel = l
 }
 
@@ -74,6 +113,7 @@ func GetLevel() string {
 	return levelToString(currentLevel)
 }
 
+// SetLevelString set level from string level
 func SetLevelString(l string) {
 	SetLevel(stringToLevel(l))
 }
@@ -91,6 +131,7 @@ func stringToLevel(s string) level {
 	case FatalLevelString:
 		return FatalLevel
 	default:
+		// TODO: make this more informative when happened
 		return InfoLevel
 	}
 }
@@ -112,73 +153,90 @@ func levelToString(l level) string {
 	}
 }
 
+// Debug log
 func Debug(args ...interface{}) {
 	sugared.Debug(args...)
 }
 
+// Debugf log
 func Debugf(format string, args ...interface{}) {
 	sugared.Debugf(format, args...)
 }
 
+// Debugw log
 func Debugw(msg string, keyAndValues ...interface{}) {
 	sugared.Debugw(msg, keyAndValues)
 }
 
+// Print log
 func Print(args ...interface{}) {
 	sugared.Info(args...)
 }
 
+// Println log
 func Println(args ...interface{}) {
 	sugared.Info(args...)
 }
 
+// Printf log
 func Printf(format string, args ...interface{}) {
 	sugared.Infof(format, args...)
 }
 
+// Printw log
 func Printw(msg string, keyAndValues ...interface{}) {
 	sugared.Infow(msg, keyAndValues...)
 }
 
+// Info log
 func Info(args ...interface{}) {
 	sugared.Info(args...)
 }
 
+// Infof log
 func Infof(format string, args ...interface{}) {
 	sugared.Infof(format, args...)
 }
 
+// Infow log
 func Infow(msg string, keyAndValues ...interface{}) {
 	sugared.Infow(msg, keyAndValues...)
 }
 
+// Warn log
 func Warn(args ...interface{}) {
 	sugared.Warn(args...)
 }
 
+// Warnf log
 func Warnf(format string, args ...interface{}) {
 	sugared.Warnf(format, args...)
 }
 
+// Warnw log
 func Warnw(msg string, keyAndValues ...interface{}) {
 	sugared.Warnw(msg, keyAndValues...)
 }
 
+// Error log
 func Error(args ...interface{}) {
 	sugared.Error(args...)
 }
 
+// Errorf log
 func Errorf(format string, args ...interface{}) {
 	sugared.Errorf(format, args...)
 }
 
+// Errorw log
 func Errorw(msg string, keyAndValues ...interface{}) {
 	sugared.Errorw(msg, keyAndValues...)
 }
 
+// Errors log log error detail from Errs
 func Errors(err error) {
 	var (
-		errFields errors.Fields
+		errFields = make(errors.Fields)
 		file      string
 		line      int
 	)
@@ -187,6 +245,9 @@ func Errors(err error) {
 		errs := err.(*errors.Errs)
 		errFields = errs.GetFields()
 		file, line = errs.GetFileAndLine()
+		if len(errFields) == 0 {
+			errFields = make(errors.Fields)
+		}
 	}
 	if line != 0 {
 		errFields["err_file"] = formatFilePath(file)
@@ -196,18 +257,22 @@ func Errors(err error) {
 	sugared.With(intf...).Error(err.Error())
 }
 
+// Fatal log
 func Fatal(args ...interface{}) {
 	sugared.Fatal(args...)
 }
 
+// Fatalf log
 func Fatalf(format string, args ...interface{}) {
 	sugared.Fatalf(format, args...)
 }
 
+// Fatalw log
 func Fatalw(format string, keyAndValues ...interface{}) {
 	sugared.Fatalw(format, keyAndValues...)
 }
 
+// With log
 func With(args ...interface{}) *zap.SugaredLogger {
 	return sugared.With(args...)
 }

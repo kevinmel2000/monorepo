@@ -1,0 +1,10 @@
+test:
+  - name: vendor dependencies
+    run: dep ensure -v -vendor-only
+    env: ['test']
+  - name: go test
+    run: go test -v ./...
+  - name: go build
+    run: go build -v
+  - name: removing binary
+    run: rm bookapp

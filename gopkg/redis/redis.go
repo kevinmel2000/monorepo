@@ -38,6 +38,14 @@ func Init(cfg Config) *Redis {
 	return r
 }
 
+// Err function
 func (r *Redis) Err() error {
 	return r.Pool.Get().Err()
+}
+
+// Do command
+func (r *Redis) Do(commandName string, args ...interface{}) (interface{}, error) {
+	conn := r.Pool.Get()
+	defer conn.Close()
+	return conn.Do(commandName, args...)
 }
